@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<title>AutoCheck – Fahrzeugprotokoll</title>
+<style>
+:root{--nav:#0f172a;--blue:#1677ff;--bg:#f3f6fa;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#6b7280;--red:#ef4444;--amber:#f59e0b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:var(--nav);color:#fff;padding:16px max(16px,calc((100% - 980px)/2));position:sticky;top:0;z-index:20}
+header .brand{display:flex;align-items:center;gap:10px}header .logo{width:38px;height:38px;border-radius:11px;background:#fff1;display:grid;place-items:center;font-size:22px}
+header h1{font-size:19px;margin:0}header p{font-size:12px;color:#cbd5e1;margin:2px 0 0}
+main{max-width:980px;margin:auto;padding:15px 15px 90px}.nav{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:14px}
+.nav button{background:#e7ebf1;border:0;border-radius:10px;padding:10px 5px;font-weight:750}.nav .active{background:var(--nav);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 3px 12px #0000000a}
+h2{font-size:18px;margin:0 0 13px}h3{font-size:14px;margin:16px 0 8px}
+label{display:block;font-size:12px;font-weight:800;margin:9px 0 5px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid #d1d5db;border-radius:10px;font:inherit;background:#fff}
+textarea{min-height:75px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{font:inherit;border:0;border-radius:10px;padding:10px 14px;font-weight:750;cursor:pointer}.primary{background:var(--blue);color:#fff}.soft{background:#e8edf3;color:#111827}.danger{background:#fee2e2;color:#991b1b}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.hidden{display:none}.muted{font-size:13px;color:var(--muted)}
+.vehicle{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}.badge{font-size:11px;background:#eaf2ff;color:#1457bd;border-radius:999px;padding:4px 7px}
+.notice{padding:11px;border-radius:10px;background:#eff6ff;color:#1e40af;font-size:13px;margin-bottom:10px}
+.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}.photo{border:1px solid var(--line);border-radius:10px;overflow:hidden}.photo img{width:100%;height:120px;object-fit:cover;display:block}.photo small{display:block;padding:5px;font-size:10px}
+.silhouette-wrap{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:8px;position:relative}
+#carSvg{width:100%;height:auto;display:block}.car-body{fill:#fff;stroke:#64748b;stroke-width:3}.car-window{fill:#dbeafe;stroke:#64748b;stroke-width:2}.wheel{fill:#1f2937}.marker{cursor:pointer}.marker circle{fill:var(--red);stroke:#fff;stroke-width:3}.marker text{fill:#fff;font-size:12px;font-weight:900;text-anchor:middle;dominant-baseline:central}
+.marker.old circle{fill:var(--amber)}.legend{display:flex;gap:15px;font-size:12px;color:var(--muted);margin:8px 2px}.dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px}.new{background:var(--red)}.old{background:var(--amber)}
+.damage{border:1px solid #fecaca;background:#fffafa;border-radius:11px;padding:11px;margin:8px 0}.damage b{color:#991b1b}
+.report img{max-width:180px;max-height:150px;border-radius:8px;margin:4px}.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px}.stat b{font-size:22px;display:block}.install{display:none;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:11px;border-radius:11px;margin-bottom:12px}
+@media(max-width:650px){.two{grid-template-columns:1fr}.nav{grid-template-columns:repeat(5,minmax(72px,1fr));overflow:auto}.photos{grid-template-columns:repeat(2,1fr)}.vehicle{flex-direction:column;align-items:flex-start}.statgrid{grid-template-columns:1fr 1fr}}
+@media print{header,.nav,.no-print{display:none!important}body{background:#fff}.card{box-shadow:none;border:0}}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  #authScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    padding: 20px;
+  }
+  #authBox {
+    width: min(420px, 100%);
+    background: white;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 10px 35px rgba(0,0,0,.15);
+  }
+  #authBox h1 { margin: 0 0 8px; }
+  #authBox p { color: #666; margin: 0 0 22px; }
+  #authBox input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px;
+    margin: 7px 0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 16px;
+  }
+  #authBox button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 9px;
+    border: 0;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  #loginBtn { background: #111; color: white; }
+  #signupBtn { background: #e9e9e9; color: #111; }
+  #authMsg { margin-top: 14px; min-height: 20px; font-size: 14px; }
+  #logoutBtn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 99998;
+    display: none;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 9px;
+    background: #111;
+    color: white;
+  }
+</style>
+
+</head>
+<body>
+
+<div id="authScreen">
+  <div id="authBox">
+    <h1>AutoCheck</h1>
+    <p>Bitte anmelden oder Konto erstellen.</p>
+    <input id="authEmail" type="email" autocomplete="email" placeholder="E-Mail">
+    <input id="authPassword" type="password" autocomplete="current-password" placeholder="Passwort">
+    <button id="loginBtn">Anmelden</button>
+    <button id="signupBtn">Konto erstellen</button>
+    <div id="authMsg"></div>
+  </div>
+</div>
+<button id="logoutBtn">Abmelden</button>
+
+<header><div class="brand"><div class="logo">🚗</div><div><h1>AutoCheck</h1><p>Fahrzeug-Übergabe & Schadendokumentation</p></div></div></header>
+<main>
+<div id="install" class="install"><b>AutoCheck installieren</b><br>Auf unterstützten Geräten kannst du die App auf dem Homescreen installieren. <button class="primary" onclick="installApp()">Installieren</button></div>
+<nav class="nav">
+<button class="active" onclick="tab('home',this)">Fahrzeuge</button><button onclick="tab('handover',this)">Übergabe</button><button onclick="tab('return',this)">Rückgabe</button><button onclick="tab('damage',this)">Schäden</button><button onclick="tab('report',this)">Protokoll</button>
+</nav>
+
+<section id="home">
+<div class="card"><h2>Fahrzeug hinzufügen</h2><div class="two">
+<div><label>Marke & Modell</label><input id="make" placeholder="z. B. BMW 320d"></div><div><label>Kennzeichen</label><input id="plate" placeholder="AN-AB 123"></div>
+<div><label>Kilometerstand</label><input id="km" type="number" placeholder="124360"></div><div><label>Farbe</label><input id="color" placeholder="Schwarz"></div>
+</div><div class="actions"><button class="primary" onclick="addVehicle()">+ Fahrzeug speichern</button></div></div>
+<div class="card"><h2>Meine Fahrzeuge</h2><div id="vehicles"></div></div>
+</section>
+
+<section id="handover" class="hidden">
+<div class="card"><h2>📸 Übergabe</h2><div id="hv" class="notice"></div>
+<div class="two"><div><label>Fahrer</label><input id="driver" placeholder="Name"></div><div><label>Kilometerstand</label><input id="hkm" type="number"></div></div>
+<label>Fotos vor der Fahrt</label><input id="before" type="file" accept="image/*" capture="environment" multiple><div id="beforeOut" class="photos"></div>
+<label>Allgemeiner Zustand</label><textarea id="hnote" placeholder="z. B. sauber, keine weiteren Schäden..."></textarea>
+<div class="actions"><button class="primary" onclick="saveHandover()">Übergabe abschließen</button></div></div>
+</section>
+
+<section id="return" class="hidden">
+<div class="card"><h2>🔎 Rückgabe</h2><div id="rv" class="notice"></div>
+<div class="two"><div><label>Kilometerstand</label><input id="rkm" type="number"></div><div><label>Rückgabe</label><input id="rdate" type="datetime-local"></div></div>
+<label>Fotos bei Rückgabe</label><input id="after" type="file" accept="image/*" capture="environment" multiple><div id="afterOut" class="photos"></div>
+<p class="muted">Neue Schäden werden im nächsten Schritt auf der Fahrzeug-Silhouette markiert.</p>
+<div class="actions"><button class="primary" onclick="goDamage()">Schäden erfassen →</button></div></div>
+</section>
+
+<section id="damage" class="hidden">
+<div class="card"><h2>⚠️ Schäden markieren</h2><div id="dv" class="notice"></div>
+<div class="silhouette-wrap">
+<svg id="carSvg" viewBox="0 0 800 480" role="img" aria-label="Fahrzeug von oben">
+<path class="car-body" d="M145 120 Q180 70 275 58 L525 58 Q620 70 655 120 L705 185 Q725 215 705 245 L655 360 Q625 405 545 415 L255 415 Q175 405 145 360 L95 245 Q75 215 95 185 Z"/>
+<path class="car-window" d="M230 105 Q250 78 300 72 L500 72 Q550 78 570 105 L535 175 L265 175 Z"/>
+<path class="car-window" d="M265 190 L535 190 L560 335 Q540 365 505 370 L295 370 Q260 365 240 335 Z"/>
+<rect class="car-window" x="290" y="190" width="220" height="35" rx="8"/>
+<circle class="wheel" cx="120" cy="155" r="32"/><circle class="wheel" cx="680" cy="155" r="32"/><circle class="wheel" cx="120" cy="325" r="32"/><circle class="wheel" cx="680" cy="325" r="32"/>
+<text x="400" y="42" text-anchor="middle" fill="#64748b" font-size="16" font-weight="700">VORNE ↑</text>
+<g id="markers"></g>
+</svg></div>
+<div class="legend"><span><i class="dot new"></i> Neuer Schaden</span><span><i class="dot old"></i> Bereits vorhanden</span></div>
+<div id="damageList"></div>
+<div class="actions"><button class="soft" onclick="clearDamage()">Markierungen löschen</button><button class="primary" onclick="saveDamageSession()">Schäden speichern</button></div></div>
+</section>
+
+<section id="report" class="hidden"><div class="card"><h2>📄 Protokoll</h2><div id="reportOut" class="report"></div><div class="actions no-print"><button class="primary" onclick="window.print()">Drucken / PDF speichern</button></div></div></section>
+</main>
+
+<script>
+let state=JSON.parse(localStorage.getItem('autocheckV2')||'{"vehicles":[],"active":null,"handover":null,"return":null,"damages":[]}');
+let bphotos=[],aphotos=[],pendingDamage=null,deferred=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function persist(){localStorage.setItem('autocheckV2',JSON.stringify(state));render()}
+function active(){return state.vehicles.find(v=>v.id===state.active)}
+function tab(id,btn){document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render()}
+function addVehicle(){let v={id:Date.now(),make:$('make').value.trim(),plate:$('plate').value.trim(),km:$('km').value,color:$('color').value.trim()};if(!v.make||!v.plate)return alert('Bitte Marke/Modell und Kennzeichen eingeben.');state.vehicles.push(v);state.active=v.id;['make','plate','km','color'].forEach(x=>$(x).value='');persist()}
+function selectVehicle(id){state.active=id;persist()}
+function delVehicle(id){if(confirm('Fahrzeug wirklich löschen?')){state.vehicles=state.vehicles.filter(v=>v.id!==id);if(state.active===id)state.active=null;persist()}}
+function setupPhotos(input,out,arr){input.addEventListener('change',()=>{arr.length=0;out.innerHTML='';[...input.files].forEach(f=>{let r=new FileReader();r.onload=e=>{arr.push({name:f.name,data:e.target.result});out.insertAdjacentHTML('beforeend',`<div class="photo"><img src="${e.target.result}"><small>${esc(f.name)}</small></div>`)};r.readAsDataURL(f)})})}
+setupPhotos($('before'),$('beforeOut'),bphotos);setupPhotos($('after'),$('afterOut'),aphotos);
+function saveHandover(){let v=active();if(!v)return alert('Bitte Fahrzeug auswählen.');if(!$('driver').value.trim())return alert('Bitte Fahrer eingeben.');state.handover={vehicleId:v.id,driver:$('driver').value,km:$('hkm').value,date:new Date().toISOString(),note:$('hnote').value,photos:bphotos};persist();alert('Übergabe gespeichert.')}
+function goDamage(){let v=active();if(!v)return alert('Bitte Fahrzeug auswählen.');state.return={vehicleId:v.id,km:$('rkm').value,date:$('rdate').value||new Date().toISOString(),photos:aphotos,damages:state.return?.vehicleId===v.id?(state.return.damages||[]):[]};render();tab('damage',document.querySelectorAll('.nav button')[3])}
+const spots=[['Vorne links',175,130],['Vorne rechts',625,130],['Hinten links',175,345],['Hinten rechts',625,345],['Fahrertür',250,250],['Beifahrertür',550,250],['Motorhaube',400,105],['Kofferraum',400,375],['Felge vorne links',115,155],['Felge vorne rechts',685,155],['Felge hinten links',115,325],['Felge hinten rechts',685,325]];
+function drawMarkers(){let v=active();let list=state.damages.filter(d=>d.vehicleId===v?.id);$('markers').innerHTML=list.map((d,i)=>`<g class="marker ${d.existing?'old':''}" onclick="editDamage(${i})"><circle cx="${d.x}" cy="${d.y}" r="15"></circle><text x="${d.x}" y="${d.y}">${i+1}</text></g>`).join('')}
+function addMarker(x,y,label){let v=active();if(!v)return;pendingDamage={vehicleId:v.id,x,y,position:label,existing:false,description:''};openDamageEditor()}
+function openDamageEditor(){let d=pendingDamage;if(!d)return;let desc=prompt('Beschreibung des Schadens an '+d.position+':','z. B. Kratzer, Delle, Lackschaden');if(desc===null){pendingDamage=null;return}d.description=desc.trim()||'Nicht näher beschrieben';state.damages.push(d);pendingDamage=null;persist()}
+function editDamage(index){let v=active(),list=state.damages.filter(d=>d.vehicleId===v?.id),d=list[index];if(!d)return;let desc=prompt('Schaden bearbeiten – '+d.position,d.description);if(desc===null)return;d.description=desc;persist()}
+$('carSvg').addEventListener('click',e=>{if(e.target.closest('.marker'))return;let pt=$('carSvg').createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;let p=pt.matrixTransform($('carSvg').getScreenCTM().inverse());let nearest=spots.reduce((a,s)=>Math.hypot(s[1]-p.x,s[2]-p.y)<Math.hypot(a[1]-p.x,a[2]-p.y)?s:a);if(Math.hypot(nearest[1]-p.x,nearest[2]-p.y)<75)addMarker(nearest[1],nearest[2],nearest[0]);else alert('Bitte auf einen Bereich des Fahrzeugs klicken.')}
+);
+function clearDamage(){let v=active();if(v){state.damages=state.damages.filter(d=>d.vehicleId!==v.id);persist()}}
+function saveDamageSession(){let v=active();if(!v)return;state.return=state.return||{};state.return.damages=state.damages.filter(d=>d.vehicleId===v.id);persist();alert('Schäden gespeichert.')}
+function report(){let v=active();if(!v){$('reportOut').innerHTML='<p class="muted">Kein Fahrzeug ausgewählt.</p>';return}let h=state.handover?.vehicleId===v.id?state.handover:null,r=state.return?.vehicleId===v.id?state.return:null,ds=state.damages.filter(d=>d.vehicleId===v.id);let imgs=a=>(a||[]).map(p=>`<img src="${p.data}" alt="">`).join('');
+$('reportOut').innerHTML=`<h3>${esc(v.make)} · ${esc(v.plate)}</h3><div class="statgrid"><div class="stat"><span class="muted">Ausgangs-KM</span><b>${esc(v.km||'-')}</b></div><div class="stat"><span class="muted">Übergabe-KM</span><b>${esc(h?.km||'-')}</b></div><div class="stat"><span class="muted">Rückgabe-KM</span><b>${esc(r?.km||'-')}</b></div></div>
+${h?`<h3>Übergabe</h3><p>Fahrer: <b>${esc(h.driver)}</b> · ${new Date(h.date).toLocaleString('de-DE')}</p><p>${esc(h.note||'')}</p>${imgs(h.photos)}`:'<div class="notice">Noch keine Übergabe.</div>'}
+${r?`<h3>Rückgabe</h3><p>${new Date(r.date).toLocaleString('de-DE')}</p>${imgs(r.photos)}<h3>Schäden</h3>${ds.length?ds.map((d,i)=>`<div class="damage"><b>⚠ ${i+1}. ${esc(d.position)}</b><br>${esc(d.description)}</div>`).join(''):'Keine Schäden dokumentiert.'}`:'<div class="notice">Noch keine Rückgabe.</div>'}`}
+
+function render(){let v=active();$('vehicles').innerHTML=state.vehicles.length?state.vehicles.map(x=>`<div class="vehicle"><div><b>${esc(x.make)}</b> <span class="badge">${esc(x.plate)}</span><div class="muted">${esc(x.color||'')} · ${esc(x.km||'-')} km</div></div><div class="actions"><button class="soft" onclick="selectVehicle(${x.id})">${x.id===state.active?'✓ ausgewählt':'Auswählen'}</button><button class="danger" onclick="delVehicle(${x.id})">Löschen</button></div></div>`).join(''):'<p class="muted">Noch kein Fahrzeug angelegt.</p>';$('hv').innerHTML=v?`<b>${esc(v.make)}</b> · ${esc(v.plate)}`:'Bitte zuerst ein Fahrzeug auswählen.';$('rv').innerHTML=$('hv').innerHTML;$('dv').innerHTML=$('hv').innerHTML;drawMarkers();let ds=v?state.damages.filter(d=>d.vehicleId===v.id):[];$('damageList').innerHTML=ds.length?ds.map((d,i)=>`<div class="damage"><b>${i+1}. ${esc(d.position)}</b><br>${esc(d.description)}<div class="actions"><button class="danger" onclick="removeDamage(${i})">Entfernen</button></div></div>`).join(''):'<p class="muted">Noch keine Markierungen. Klicke auf die Fahrzeug-Silhouette.</p>';report()}
+function removeDamage(i){let v=active(),list=state.damages.filter(d=>d.vehicleId===v.id),target=list[i];state.damages=state.damages.filter(d=>d!==target);persist()}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('install').style.display='block'});function installApp(){if(deferred){deferred.prompt();deferred=null;$('install').style.display='none'}}
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
+render();
+</script>
+
+<script>
+(() => {
+  const SUPABASE_URL = 'https://nskguwvyysavbyjwkmez.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'DEIN_SUPABASE_PUBLISHABLE_KEY_HIER_EINTRAGEN';
+
+  const authScreen = document.getElementById('authScreen');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const msg = document.getElementById('authMsg');
+
+  // Die App bleibt bis zur Anmeldung gesperrt.
+  // Am PC später nur den Platzhalter oben durch den Publishable Key ersetzen.
+  if (SUPABASE_PUBLISHABLE_KEY.startsWith('DEIN_')) {
+    msg.textContent = 'Supabase-Schlüssel noch nicht eingetragen.';
+    return;
+  }
+
+  const client = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  function showLoggedIn() {
+    authScreen.style.display = 'none';
+    logoutBtn.style.display = 'block';
+  }
+
+  function showLoggedOut() {
+    authScreen.style.display = 'flex';
+    logoutBtn.style.display = 'none';
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', async () => {
+    msg.textContent = 'Anmeldung läuft …';
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const { error } = await client.auth.signInWithPassword({ email, password });
+    msg.textContent = error ? error.message : '';
+  });
+
+  document.getElementById('signupBtn').addEventListener('click', async () => {
+    msg.textContent = 'Konto wird erstellt …';
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const { data, error } = await client.auth.signUp({ email, password });
+    if (error) {
+      msg.textContent = error.message;
+    } else if (!data.session) {
+      msg.textContent = 'Konto erstellt. Bitte E-Mail bestätigen, falls Supabase dies verlangt.';
+    } else {
+      msg.textContent = '';
+    }
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    await client.auth.signOut();
+  });
+
+  client.auth.onAuthStateChange((_event, session) => {
+    if (session) showLoggedIn();
+    else showLoggedOut();
+  });
+
+  client.auth.getSession().then(({ data }) => {
+    if (data.session) showLoggedIn();
+    else showLoggedOut();
+  });
+})();
+</script>
+
+</body></html>
