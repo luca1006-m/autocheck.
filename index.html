@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<title>AutoCheck – Fahrzeug-Übergabe</title>
+<style>
+:root{
+  --bg:#f4f7fb;--panel:rgba(255,255,255,.78);--panel2:rgba(255,255,255,.94);
+  --text:#101828;--muted:#667085;--line:rgba(16,24,40,.10);--blue:#3977ff;
+  --blue2:#6d5dfc;--danger:#ef476f;--ok:#18a56b;--shadow:0 20px 60px rgba(25,35,60,.12);
+}
+[data-theme="dark"]{
+  --bg:#070b14;--panel:rgba(17,24,39,.72);--panel2:rgba(20,28,45,.94);
+  --text:#f5f7fb;--muted:#9aa6b8;--line:rgba(255,255,255,.10);--shadow:0 25px 70px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 20% 0%,rgba(57,119,255,.15),transparent 32%),radial-gradient(circle at 100% 20%,rgba(109,93,252,.12),transparent 30%),var(--bg)}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.app{max-width:1120px;margin:auto;padding:18px 16px 100px}
+.glass{background:var(--panel);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:26px}
+.topbar{position:sticky;top:12px;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:13px 16px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:44px;height:44px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--blue2));box-shadow:0 10px 28px rgba(57,119,255,.28);color:#fff;font-weight:900;font-size:21px}
+.brand h1{font-size:18px;margin:0;letter-spacing:-.3px}.brand small{color:var(--muted)}
+.top-actions{display:flex;gap:8px;align-items:center}
+.iconbtn{width:42px;height:42px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--text)}
+.user-pill{padding:10px 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);font-size:12px;color:var(--muted);max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.status.ok{background:rgba(24,165,107,.12);color:var(--ok)}.status.bad{background:rgba(239,71,111,.12);color:var(--danger)}
+.nav{display:flex;gap:8px;overflow:auto;padding:3px;margin-bottom:18px}
+.nav button{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:11px 15px;border-radius:15px;font-weight:800}
+.nav button.active{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border-color:transparent;box-shadow:0 10px 28px rgba(57,119,255,.22)}
+.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{padding:20px;margin-bottom:16px}.card h2{margin:0 0 5px;font-size:20px;letter-spacing:-.5px}.card .sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+.hero{padding:26px;min-height:220px;display:flex;align-items:flex-end;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(57,119,255,.16),rgba(109,93,252,.08)),var(--panel)}
+.hero:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;right:-100px;top:-120px;background:rgba(57,119,255,.16);filter:blur(10px)}
+.hero h2{font-size:34px;max-width:580px;position:relative;z-index:2}.hero p{color:var(--muted);max-width:600px;position:relative;z-index:2}
+label{display:block;font-size:12px;font-weight:850;margin:10px 0 6px}
+input,textarea,select{width:100%;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:14px;padding:13px 14px;outline:none}
+input:focus,textarea:focus,select:focus{border-color:rgba(57,119,255,.55);box-shadow:0 0 0 4px rgba(57,119,255,.10)}
+textarea{min-height:90px;resize:vertical}
+.primary,.secondary,.danger{border:0;border-radius:14px;padding:12px 15px;font-weight:850}
+.primary{color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue2));box-shadow:0 10px 25px rgba(57,119,255,.20)}
+.secondary{color:var(--text);background:var(--panel2);border:1px solid var(--line)}
+.danger{color:#fff;background:var(--danger)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.vehicle{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px;border:1px solid var(--line);background:var(--panel2);border-radius:18px;margin-top:10px}
+.vehicle.selected{outline:2px solid rgba(57,119,255,.35)}
+.vehicle strong{display:block}.vehicle small{color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpi{padding:15px;border:1px solid var(--line);background:var(--panel2);border-radius:18px}.kpi b{font-size:24px;display:block}.kpi span{font-size:11px;color:var(--muted)}
+.section-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:18px 0 10px}.section-title h3{margin:0;font-size:15px}
+.photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.photo-card{overflow:hidden;border:1px solid var(--line);background:var(--panel2);border-radius:18px}
+.photo-head{padding:12px;display:flex;justify-content:space-between;align-items:center}.photo-head b{font-size:13px}.photo-head span{font-size:11px;color:var(--muted)}
+.photo-box{aspect-ratio:4/3;background:linear-gradient(135deg,#e8eef8,#dce5f5);position:relative;overflow:hidden}
+[data-theme="dark"] .photo-box{background:linear-gradient(135deg,#111827,#1d2940)}
+.photo-box img{width:100%;height:100%;object-fit:cover;display:block}.photo-empty{height:100%;display:grid;place-items:center;color:var(--muted);font-size:12px;text-align:center;padding:20px}
+.photo-actions{padding:10px;display:flex;gap:7px}.filebtn{display:block;text-align:center;border:1px solid var(--line);background:var(--panel);padding:10px;border-radius:12px;font-weight:800;font-size:12px;flex:1}.delete-photo{border:1px solid rgba(239,71,111,.22);background:rgba(239,71,111,.08);color:var(--danger);padding:10px 12px;border-radius:12px;font-weight:850}
+input[type=file]{display:none}
+.damage-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.damage-tabs button{border:1px solid var(--line);background:var(--panel2);color:var(--muted);padding:12px 8px;border-radius:14px;font-weight:850}.damage-tabs button.active{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border-color:transparent}
+.car-preview{border-radius:22px;overflow:hidden;min-height:280px;background:#dce5f5;position:relative}.car-preview img{width:100%;height:100%;min-height:280px;object-fit:cover;display:block}.car-label{position:absolute;left:14px;bottom:14px;background:rgba(0,0,0,.55);color:#fff;padding:8px 11px;border-radius:12px;font-weight:850;font-size:12px;backdrop-filter:blur(10px)}
+.damage-list{display:grid;gap:9px;margin-top:12px}.damage-item{padding:13px;border:1px solid rgba(239,71,111,.20);background:rgba(239,71,111,.07);border-radius:16px}
+.report{background:var(--panel2);border:1px solid var(--line);border-radius:22px;padding:22px}.report-head{display:flex;justify-content:space-between;gap:15px;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:16px}.report h3{margin:18px 0 8px}.report img{max-width:180px;border-radius:12px;margin:5px}
+.toast{position:fixed;left:50%;bottom:25px;transform:translateX(-50%) translateY(20px);background:#101828;color:#fff;padding:12px 16px;border-radius:14px;opacity:0;pointer-events:none;transition:.25s;z-index:100;font-size:13px;box-shadow:0 15px 40px rgba(0,0,0,.25)}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#auth{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 20% 10%,rgba(57,119,255,.22),transparent 30%),radial-gradient(circle at 90% 80%,rgba(109,93,252,.20),transparent 30%),#070b14}
+.auth-card{width:min(430px,100%);padding:30px;border-radius:30px;background:rgba(18,25,42,.78);border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 100px rgba(0,0,0,.42);backdrop-filter:blur(28px);color:#fff}
+.auth-brand{text-align:center;margin-bottom:25px}.auth-brand .logo{margin:auto;width:62px;height:62px;font-size:28px}.auth-brand h1{font-size:30px;margin:13px 0 4px}.auth-brand p{margin:0;color:#9aa6b8;font-size:13px}
+.auth-card label{color:#d7deea}.auth-card input{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10);color:#fff}.auth-card input::placeholder{color:#7e8ba0}.auth-card .secondary{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.10);color:#fff;width:100%}.auth-msg{min-height:20px;color:#ff9bb2;font-size:12px;margin-top:10px;text-align:center}
+
+.damage-choice-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.damage-choice{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:18px;padding:15px 10px;display:flex;flex-direction:column;align-items:center;gap:5px;min-height:110px;transition:.18s}
+.damage-choice:hover,.position-choice:hover{transform:translateY(-1px)}
+.damage-choice.active,.position-choice.active{border-color:rgba(57,119,255,.65);background:linear-gradient(135deg,rgba(57,119,255,.18),rgba(109,93,252,.10));box-shadow:0 8px 24px rgba(57,119,255,.10)}
+.choice-icon{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:rgba(57,119,255,.12);color:var(--blue);font-size:20px;font-weight:900}
+.damage-choice b{font-size:13px}.damage-choice small{font-size:10px;color:var(--muted)}
+.position-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.position-choice{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:13px;padding:12px 8px;font-weight:800;font-size:12px}
+.example-damage{margin-top:14px;border:1px solid rgba(57,119,255,.18);background:rgba(57,119,255,.07);border-radius:16px;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;font-size:12px}.example-damage>div:last-child{font-weight:800}.example-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:6px}
+.quick-examples{display:flex;gap:7px;flex-wrap:wrap}.quick-examples button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;padding:9px 11px;font-size:12px;font-weight:750}
+@media(max-width:700px){.damage-choice-grid{grid-template-columns:repeat(2,1fr)}.damage-choice:last-child{grid-column:span 2}.position-grid{grid-template-columns:1fr 1fr}.example-damage{flex-direction:column}}
+@media(max-width:820px){.grid{grid-template-columns:1fr}.hero h2{font-size:28px}}
+@media(max-width:600px){.app{padding:10px 10px 90px}.topbar{top:7px}.user-pill{display:none}.grid2,.photo-grid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr 1fr}.card{padding:16px;border-radius:22px}.hero{padding:22px;min-height:190px}.damage-tabs{grid-template-columns:repeat(2,1fr)}}
+@media print{body{background:#fff}.no-print,.nav,.topbar{display:none!important}.card,.glass,.report{box-shadow:none;border:0;background:#fff}.app{padding:0}}
+</style>
+</head>
+<body>
+
+<div id="auth">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="logo">AC</div>
+      <h1>AutoCheck</h1>
+      <p>Fahrzeug-Übergabe & Schadendokumentation</p>
+    </div>
+    <label>E-Mail</label>
+    <input id="email" type="email" autocomplete="email" placeholder="name@beispiel.de">
+    <label>Passwort</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+    <div class="actions">
+      <button class="primary" style="width:100%" id="loginBtn">Anmelden</button>
+      <button class="secondary" id="signupBtn">Konto erstellen</button>
+    </div>
+    <div id="authMsg" class="auth-msg"></div>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+  <header class="topbar glass">
+    <div class="brand">
+      <div class="logo">AC</div>
+      <div><h1>AutoCheck</h1><small>Fahrzeug-Dokumentation</small></div>
+    </div>
+    <div class="top-actions">
+      <span id="cloudStatus" class="status bad">☁ Nicht synchronisiert</span>
+      <span id="userPill" class="user-pill"></span>
+      <button class="iconbtn" id="themeBtn" title="Hell/Dunkel">☾</button>
+      <button class="iconbtn" id="logoutBtn" title="Abmelden">↪</button>
+    </div>
+  </header>
+
+  <nav class="nav no-print">
+    <button class="active" data-tab="home">Übersicht</button>
+    <button data-tab="photos">Fotos</button>
+    <button data-tab="damage">Schäden</button>
+    <button data-tab="handover">Übergabe</button>
+    <button data-tab="return">Rückgabe</button>
+    <button data-tab="report">Protokoll</button>
+  </nav>
+
+  <main>
+    <section id="home">
+      <div class="hero glass card">
+        <div>
+          <h2>Alles rund um dein Fahrzeug. An einem Ort.</h2>
+          <p>Dokumentiere Übergabe, Rückgabe, Fotos und Schäden – synchronisiert mit deinem AutoCheck-Konto.</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <div class="glass card">
+            <h2>Fahrzeug</h2><div class="sub">Aktuelles Fahrzeug auswählen oder neu anlegen.</div>
+            <div class="grid2">
+              <div><label>Marke & Modell</label><input id="make" placeholder="z. B. VW Touran"></div>
+              <div><label>Kennzeichen</label><input id="plate" placeholder="N-AB 1234"></div>
+              <div><label>Kilometerstand</label><input id="km" type="number" placeholder="124360"></div>
+              <div><label>Farbe</label><input id="color" placeholder="Schwarz"></div>
+            </div>
+            <div class="actions"><button class="primary" id="addVehicleBtn">+ Fahrzeug speichern</button></div>
+          </div>
+          <div class="glass card">
+            <div class="section-title"><h3>Meine Fahrzeuge</h3><span id="vehicleCount" class="status">0</span></div>
+            <div id="vehicleList"></div>
+          </div>
+        </div>
+        <div>
+          <div class="glass card">
+            <h2>Status</h2><div class="sub">Dokumentationsfortschritt</div>
+            <div class="kpis">
+              <div class="kpi"><b id="kpiPhotos">0</b><span>Fotos</span></div>
+              <div class="kpi"><b id="kpiDamage">0</b><span>Schäden</span></div>
+              <div class="kpi"><b id="kpiVehicles">0</b><span>Fahrzeuge</span></div>
+            </div>
+          </div>
+          <div class="glass card">
+            <h2>Speichern</h2><div class="sub">Änderungen werden automatisch in deiner Cloud gespeichert.</div>
+            <button class="primary" style="width:100%" id="saveNowBtn">☁ Jetzt speichern</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="photos" class="hidden">
+      <div class="glass card">
+        <h2>Fotoinspektion</h2><div class="sub">Vorher und Nachher getrennt dokumentieren.</div>
+        <div class="section-title"><h3>Außen</h3><span class="muted">Front · Links · Rechts · Heck</span></div>
+        <div id="exteriorGrid" class="photo-grid"></div>
+        <div class="section-title"><h3>Räder</h3><span class="muted">Jedes Rad separat · vorher / nachher</span></div>
+        <div id="wheelGrid" class="photo-grid"></div>
+        <div class="section-title"><h3>Innenraum</h3><span class="muted">Mindestens 2 Aufnahmen</span></div>
+        <div id="interiorGrid" class="photo-grid"></div>
+      </div>
+    </section>
+
+    <section id="damage" class="hidden">
+  <div class="glass card">
+    <h2>Schaden erfassen</h2>
+    <div class="sub">Wähle einfach Schadenart und Position. Keine Fahrzeugbilder nötig.</div>
+
+    <div class="section-title"><h3>Schadenart</h3><span class="muted">Beispiel: Kratzer</span></div>
+    <div class="damage-choice-grid" id="damageTypeChoices">
+      <button class="damage-choice active" data-type="Kratzer"><span class="choice-icon">〰</span><b>Kratzer</b><small>z. B. 5 cm</small></button>
+      <button class="damage-choice" data-type="Delle"><span class="choice-icon">◉</span><b>Delle</b><small>z. B. Stoß</small></button>
+      <button class="damage-choice" data-type="Steinschlag"><span class="choice-icon">✦</span><b>Steinschlag</b><small>z. B. Motorhaube</small></button>
+      <button class="damage-choice" data-type="Lackschaden"><span class="choice-icon">◆</span><b>Lackschaden</b><small>z. B. Abplatzung</small></button>
+      <button class="damage-choice" data-type="Sonstiges"><span class="choice-icon">•••</span><b>Sonstiges</b><small>Andere Beschädigung</small></button>
+    </div>
+
+    <div class="section-title"><h3>Position</h3><span class="muted">Wo befindet sich der Schaden?</span></div>
+    <div class="position-grid" id="damagePositionChoices">
+      <button class="position-choice active" data-position="Vorne links">Vorne links</button>
+      <button class="position-choice" data-position="Vorne Mitte">Vorne Mitte</button>
+      <button class="position-choice" data-position="Vorne rechts">Vorne rechts</button>
+      <button class="position-choice" data-position="Hinten links">Hinten links</button>
+      <button class="position-choice" data-position="Hinten Mitte">Hinten Mitte</button>
+      <button class="position-choice" data-position="Hinten rechts">Hinten rechts</button>
+      <button class="position-choice" data-position="Seite links">Seite links</button>
+      <button class="position-choice" data-position="Seite rechts">Seite rechts</button>
+      <button class="position-choice" data-position="Stoßfänger vorne">Stoßfänger vorne</button>
+      <button class="position-choice" data-position="Stoßfänger hinten">Stoßfänger hinten</button>
+      <button class="position-choice" data-position="Motorhaube">Motorhaube</button>
+      <button class="position-choice" data-position="Dach">Dach</button>
+    </div>
+
+    <div class="example-damage">
+      <div><span class="example-dot"></span><b>Beispiel</b></div>
+      <div id="damageExample">Vorne links · Kratzer</div>
+    </div>
+
+    <div class="grid2" style="margin-top:14px">
+      <div><label>Notiz (optional)</label><textarea id="damageText" placeholder="z. B. Kratzer am Stoßfänger, ca. 5 cm"></textarea></div>
+      <div><label>Kurze Beschreibung</label><div class="quick-examples"><button type="button" data-note="ca. 5 cm">ca. 5 cm</button><button type="button" data-note="leicht">leicht</button><button type="button" data-note="stark">stark</button><button type="button" data-note="Lack ab">Lack ab</button></div></div>
+    </div>
+    <div class="actions"><button class="primary" id="addDamageBtn">＋ Schaden hinzufügen</button></div>
+    <div id="damageList" class="damage-list"></div>
+  </div>
+</section>
+
+    <section id="handover" class="hidden">
+      <div class="glass card">
+        <h2>Übergabe</h2><div class="sub">Zustand vor der Fahrt dokumentieren.</div>
+        <div class="grid2">
+          <div><label>Fahrer</label><input id="driver" placeholder="Name"></div>
+          <div><label>Kilometerstand</label><input id="handoverKm" type="number"></div>
+        </div>
+        <label>Bemerkung</label><textarea id="handoverNote" placeholder="Allgemeiner Zustand..."></textarea>
+        <div class="actions"><button class="primary" id="saveHandoverBtn">Übergabe speichern</button></div>
+      </div>
+    </section>
+
+    <section id="return" class="hidden">
+      <div class="glass card">
+        <h2>Rückgabe</h2><div class="sub">Rückgabezustand und Kilometerstand festhalten.</div>
+        <div class="grid2">
+          <div><label>Kilometerstand</label><input id="returnKm" type="number"></div>
+          <div><label>Datum & Uhrzeit</label><input id="returnDate" type="datetime-local"></div>
+        </div>
+        <label>Bemerkung</label><textarea id="returnNote" placeholder="Zustand bei Rückgabe..."></textarea>
+        <div class="actions"><button class="primary" id="saveReturnBtn">Rückgabe speichern</button></div>
+      </div>
+    </section>
+
+    <section id="report" class="hidden">
+      <div class="glass card">
+        <div class="actions no-print" style="justify-content:flex-end"><button class="primary" id="printBtn">Protokoll drucken / PDF</button></div>
+        <div id="reportOut" class="report"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://nskguwvyysavbyjwkmez.supabase.co';
+const SUPABASE_KEY='sb_publishable_o_LiCB2j8r1KWCunkBiggQ_7Co6LBr9';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const $=id=>document.getElementById(id);
+const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let user=null,saveTimer=null,cloudSaving=false;
+let data={version:7,vehicles:[],activeId:null,updatedAt:null};
+let damageType='Kratzer',damagePosition='Vorne links';
+
+const views={
+  links:{label:'Links',img:'https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&w=1400&q=85'},
+  rechts:{label:'Rechts',img:'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1400&q=85'},
+  vorne:{label:'Vorne',img:'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1400&q=85'},
+  hinten:{label:'Hinten',img:'https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1400&q=85'}
+};
+
+function toast(msg){
+  $('toast').textContent=msg;$('toast').classList.add('show');
+  clearTimeout(window.__toast);window.__toast=setTimeout(()=>$('toast').classList.remove('show'),2200);
+}
+function setCloud(ok){
+  $('cloudStatus').className='status '+(ok?'ok':'bad');
+  $('cloudStatus').textContent=ok?'☁ Gespeichert':'☁ Nicht synchronisiert';
+}
+function vehicleData(v){
+  if(!v) return null;
+  if(!v.photos) v.photos={};
+  if(!v.damages) v.damages=[];
+  if(!v.handover) v.handover=null;
+  if(!v.returnData) v.returnData=null;
+  return v;
+}
+function currentVehicle(){return vehicleData(data.vehicles.find(v=>v.id===data.activeId)||null)}
+function photoKey(section,side){return section+'_'+side}
+function ensurePhotoKey(v,k){if(!v.photos[k])v.photos[k]={before:null,after:null}}
+
+async function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>{
+      const img=new Image();
+      img.onload=()=>{
+        const max=1280,scale=Math.min(1,max/Math.max(img.width,img.height));
+        const c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        resolve(c.toDataURL('image/jpeg',.78));
+      };img.onerror=reject;img.src=r.result;
+    };r.onerror=reject;r.readAsDataURL(file);
+  });
+}
+async function cloudSave(show=true){
+  if(!user||cloudSaving)return false;
+  cloudSaving=true;
+  try{
+    data.updatedAt=new Date().toISOString();
+    const blob=new Blob([JSON.stringify({userId:user.id,...data})],{type:'application/json'});
+    const path=user.id+'/autocheck-data.json';
+    const {error}=await sb.storage.from('autocheck-photos').upload(path,blob,{upsert:true,contentType:'application/json',cacheControl:'0'});
+    if(error)throw error;
+    setCloud(true);if(show)toast('Cloud gespeichert ✓');return true;
+  }catch(e){
+    console.error(e);setCloud(false);if(show)toast('Cloud-Speicherung fehlgeschlagen');return false;
+  }finally{cloudSaving=false}
+}
+async function cloudLoad(){
+  if(!user)return false;
+  try{
+    const {data:file,error}=await sb.storage.from('autocheck-photos').download(user.id+'/autocheck-data.json');
+    if(error)throw error;
+    const obj=JSON.parse(await file.text());
+    if(obj&&Array.isArray(obj.vehicles)){data=obj;migrateLegacy();setCloud(true);return true}
+  }catch(e){setCloud(false)}
+  return false;
+}
+function scheduleSave(){
+  clearTimeout(saveTimer);saveTimer=setTimeout(()=>cloudSave(false),700);
+}
+function localBackup(){try{localStorage.setItem('autocheck-local',JSON.stringify(data))}catch(e){}}
+
+async function signIn(){
+  const email=$('email').value.trim(),password=$('password').value;
+  if(!email||!password){$('authMsg').textContent='Bitte E-Mail und Passwort eingeben.';return}
+  $('authMsg').textContent='Anmeldung läuft...';
+  const {error}=await sb.auth.signInWithPassword({email,password});
+  if(error)$('authMsg').textContent=error.message;
+}
+async function signUp(){
+  const email=$('email').value.trim(),password=$('password').value;
+  if(!email||password.length<6){$('authMsg').textContent='Bitte E-Mail eingeben und ein Passwort mit mindestens 6 Zeichen verwenden.';return}
+  $('authMsg').textContent='Konto wird erstellt...';
+  const {data:res,error}=await sb.auth.signUp({email,password});
+  if(error){$('authMsg').textContent=error.message;return}
+  if(!res.session)$('authMsg').textContent='Konto erstellt. Prüfe ggf. deine E-Mail zur Bestätigung.';
+  else $('authMsg').textContent='';
+}
+async function logout(){await sb.auth.signOut()}
+async function enterApp(u){
+  user=u;$('auth').classList.add('hidden');$('app').classList.remove('hidden');$('userPill').textContent=u.email||'Konto';
+  const loaded=await cloudLoad();
+  if(!loaded){
+    try{const old=JSON.parse(localStorage.getItem('autocheck-local')||'null');if(old){data=old;await cloudSave(false)}}catch(e){}
+  }
+  renderAll();
+}
+function exitApp(){user=null;$('auth').classList.remove('hidden');$('app').classList.add('hidden')}
+sb.auth.onAuthStateChange((_event,session)=>{if(session)enterApp(session.user);else exitApp()});
+
+$('loginBtn').onclick=signIn;$('signupBtn').onclick=signUp;$('logoutBtn').onclick=logout;
+$('themeBtn').onclick=()=>{
+  const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);localStorage.setItem('autocheck-theme',next);$('themeBtn').textContent=next==='dark'?'☀':'☾';
+};
+const savedTheme=localStorage.getItem('autocheck-theme')||'light';
+document.documentElement.setAttribute('data-theme',savedTheme);$('themeBtn').textContent=savedTheme==='dark'?'☀':'☾';
+
+document.querySelectorAll('.nav button').forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));
+  $(btn.dataset.tab).classList.remove('hidden');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderAll();
+});
+
+$('addVehicleBtn').onclick=()=>{
+  const make=$('make').value.trim(),plate=$('plate').value.trim();
+  if(!make||!plate){toast('Marke/Modell und Kennzeichen fehlen');return}
+  const v={id:crypto.randomUUID(),make,plate,km:$('km').value,color:$('color').value.trim(),photos:{},damages:[],handover:null,returnData:null};
+  data.vehicles.push(v);data.activeId=v.id;['make','plate','km','color'].forEach(id=>$(id).value='');saveAndRender();
+};
+function saveAndRender(){localBackup();renderAll();scheduleSave()}
+function selectVehicle(id){data.activeId=id;saveAndRender()}
+function deleteVehicle(id){if(!confirm('Fahrzeug wirklich löschen?'))return;data.vehicles=data.vehicles.filter(v=>v.id!==id);if(data.activeId===id)data.activeId=data.vehicles[0]?.id||null;saveAndRender()}
+
+function renderVehicles(){
+  $('vehicleCount').textContent=data.vehicles.length;
+  $('kpiVehicles').textContent=data.vehicles.length;
+  $('vehicleList').innerHTML=data.vehicles.length?data.vehicles.map(v=>`
+    <div class="vehicle ${v.id===data.activeId?'selected':''}">
+      <div><strong>${escapeHtml(v.make)}</strong><small>${escapeHtml(v.plate)} · ${escapeHtml(v.color||'')} · ${escapeHtml(v.km||'-')} km</small></div>
+      <div class="actions" style="margin:0"><button class="secondary" onclick="selectVehicle('${v.id}')">${v.id===data.activeId?'✓ Ausgewählt':'Auswählen'}</button><button class="danger" onclick="deleteVehicle('${v.id}')">Löschen</button></div>
+    </div>`).join(''):'<div class="sub">Noch kein Fahrzeug angelegt.</div>';
+}
+
+function photoCard(section,key,label){
+  ensurePhotoKey(key);
+  const p=data.photos[key];
+  return `<div class="photo-card">
+    <div class="photo-head"><b>${label}</b><span>Vorher / Nachher</span></div>
+    <div class="photo-box"><img id="img_${key}_before" class="${p.before?'':'hidden'}" src="${p.before||''}"><div id="empty_${key}_before" class="photo-empty ${p.before?'hidden':''}">Noch kein Vorher-Foto</div></div>
+    <div class="photo-actions"><label class="filebtn">📷 Vorher aufnehmen<input type="file" accept="image/*" capture="environment" onchange="handlePhoto('${key}','before',this.files[0])"></label>${p.before?`<button class="delete-photo" type="button" onclick="deletePhoto('${key}','before')">🗑 Löschen</button>`:''}</div>
+    <div class="photo-box"><img id="img_${key}_after" class="${p.after?'':'hidden'}" src="${p.after||''}"><div id="empty_${key}_after" class="photo-empty ${p.after?'hidden':''}">Noch kein Nachher-Foto</div></div>
+    <div class="photo-actions"><label class="filebtn">📷 Nachher aufnehmen<input type="file" accept="image/*" capture="environment" onchange="handlePhoto('${key}','after',this.files[0])"></label>${p.after?`<button class="delete-photo" type="button" onclick="deletePhoto('${key}','after')">🗑 Löschen</button>`:''}</div>
+  </div>`;
+}
+async function handlePhoto(key,which,file){
+  if(!file)return;ensurePhotoKey(key);data.photos[key][which]=await compressImage(file);localBackup();renderPhotos();scheduleSave();toast('Foto gespeichert');
+}
+function deletePhoto(key,which){
+  ensurePhotoKey(key);
+  if(!data.photos[key][which])return;
+  data.photos[key][which]=null;
+  localBackup();
+  renderPhotos();
+  scheduleSave();
+  toast('Foto gelöscht');
+}
+window.deletePhoto=deletePhoto;
+
+function renderPhotos(){
+  const ext=[['front','Vorne'],['left','Links'],['right','Rechts'],['rear','Hinten']];
+  const wheels=[['wheel_fl','Vorne links'],['wheel_fr','Vorne rechts'],['wheel_rl','Hinten links'],['wheel_rr','Hinten rechts']];
+  const interior=[['interior_1','Innenraum 1'],['interior_2','Innenraum 2'],['interior_3','Innenraum 3'],['interior_4','Innenraum 4']];
+  $('exteriorGrid').innerHTML=ext.map(x=>photoCard('exterior',photoKey('exterior',x[0]),x[1])).join('');
+  $('wheelGrid').innerHTML=wheels.map(x=>photoCard('wheel',photoKey('wheel',x[0]),x[1])).join('');
+  $('interiorGrid').innerHTML=interior.map(x=>photoCard('interior',photoKey('interior',x[0]),x[1])).join('');
+}
+window.handlePhoto=handlePhoto;
+
+document.querySelectorAll('#damageTypeChoices .damage-choice').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#damageTypeChoices .damage-choice').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); damageType=b.dataset.type; updateDamageExample();
+});
+document.querySelectorAll('#damagePositionChoices .position-choice').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#damagePositionChoices .position-choice').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); damagePosition=b.dataset.position; updateDamageExample();
+});
+document.querySelectorAll('.quick-examples button').forEach(b=>b.onclick=()=>{
+  const t=$('damageText'); t.value=t.value?(t.value+', '+b.dataset.note):b.dataset.note;
+});
+function updateDamageExample(){ $('damageExample').textContent=damagePosition+' · '+damageType; }
+function renderDamage(){
+  const vcur=currentVehicle(); const list=vcur?vcur.damages:[];
+  $('damageList').innerHTML=list.length?list.map((d)=>`<div class="damage-item"><b>${escapeHtml(d.position)} · ${escapeHtml(d.type)}</b><div>${escapeHtml(d.text||'Keine Notiz')}</div><div class="actions"><button class="danger" onclick="removeDamage('${d.id}')">Entfernen</button></div></div>`).join(''):'<div class="sub">Noch keine Schäden für dieses Fahrzeug dokumentiert.</div>';
+  updateDamageExample();
+}
+$('addDamageBtn').onclick=()=>{
+  if(!currentVehicle()){toast('Bitte zuerst ein Fahrzeug auswählen');return}
+  const text=$('damageText').value.trim();
+  data.damages.push({id:crypto.randomUUID(),vehicleId:data.activeId,position:damagePosition,type:damageType,text,date:new Date().toISOString()});
+  $('damageText').value='';saveAndRender();toast(damagePosition+' · '+damageType+' gespeichert ✓');
+};
+function removeDamage(id){const v=currentVehicle();if(!v)return;v.damages=v.damages.filter(d=>d.id!==id);saveAndRender()}
+
+$('saveHandoverBtn').onclick=()=>{
+  if(!currentVehicle()){toast('Bitte zuerst Fahrzeug auswählen');return}
+  const v=currentVehicle();v.handover={driver:$('driver').value.trim(),km:$('handoverKm').value,note:$('handoverNote').value,date:new Date().toISOString()};
+  saveAndRender();toast('Übergabe gespeichert ✓');
+};
+$('saveReturnBtn').onclick=()=>{
+  if(!currentVehicle()){toast('Bitte zuerst Fahrzeug auswählen');return}
+  const v=currentVehicle();v.returnData={km:$('returnKm').value,date:$('returnDate').value||new Date().toISOString(),note:$('returnNote').value};
+  saveAndRender();toast('Rückgabe gespeichert ✓');
+};
+$('saveNowBtn').onclick=()=>cloudSave(true);
+$('printBtn').onclick=()=>window.print();
+
+function renderReport(){
+  const v=currentVehicle();
+  if(!v){$('reportOut').innerHTML='<h2>Kein Fahrzeug ausgewählt</h2><p>Bitte zuerst ein Fahrzeug auswählen.</p>';return}
+  const ds=v.damages||[];
+  const photos=Object.values(v.photos||{}).flatMap(p=>[p.before,p.after]).filter(Boolean);
+  $('reportOut').innerHTML=`
+    <div class="report-head"><div><h2 style="margin:0">AutoCheck Protokoll</h2><div class="sub">${new Date().toLocaleString('de-DE')}</div></div><div><b>${escapeHtml(v.make)}</b><br>${escapeHtml(v.plate)}</div></div>
+    <h3>Fahrzeug</h3><p>${escapeHtml(v.make)} · ${escapeHtml(v.plate)} · ${escapeHtml(v.color||'')} · ${escapeHtml(v.km||'-')} km</p>
+    <h3>Übergabe</h3><p>${v.handover?`${escapeHtml(v.handover.driver||'-')} · ${escapeHtml(v.handover.km||'-')} km<br>${escapeHtml(v.handover.note||'')}`:'Keine Übergabe gespeichert.'}</p>
+    <h3>Rückgabe</h3><p>${v.returnData?`${escapeHtml(v.returnData.km||'-')} km<br>${escapeHtml(v.returnData.note||'')}`:'Keine Rückgabe gespeichert.'}</p>
+    <h3>Schäden (${ds.length})</h3>${ds.length?ds.map(d=>`<p><b>${escapeHtml(d.position)} · ${escapeHtml(d.type)}</b><br>${escapeHtml(d.text)}</p>`).join(''):'<p>Keine Schäden dokumentiert.</p>'}
+    <h3>Fotos (${photos.length})</h3>${photos.length?photos.map(x=>`<img src="${x}">`).join(''):'<p>Keine Fotos gespeichert.</p>'}`;
+}
+
+function migrateLegacy(){
+  if(!Array.isArray(data.vehicles))data.vehicles=[];
+  data.vehicles.forEach(v=>{
+    if(!v.photos)v.photos={};
+    if(!v.damages)v.damages=[];
+    if(!v.handover)v.handover=null;
+    if(!v.returnData)v.returnData=null;
+  });
+  if(data.photos && Object.keys(data.photos).length && data.activeId){
+    const v=data.vehicles.find(x=>x.id===data.activeId);
+    if(v && !Object.keys(v.photos).length)v.photos=data.photos;
+  }
+  if(Array.isArray(data.damages) && data.damages.length && data.activeId){
+    const v=data.vehicles.find(x=>x.id===data.activeId);
+    if(v && !v.damages.length)v.damages=data.damages.map(d=>({...d,vehicleId:undefined}));
+  }
+  if(data.handover && data.activeId){
+    const v=data.vehicles.find(x=>x.id===data.activeId);
+    if(v&&!v.handover)v.handover={...data.handover};
+  }
+  if(data.returnData && data.activeId){
+    const v=data.vehicles.find(x=>x.id===data.activeId);
+    if(v&&!v.returnData)v.returnData={...data.returnData};
+  }
+  delete data.photos;delete data.damages;delete data.handover;delete data.returnData;
+  data.version=7;
+}
+migrateLegacy();
+
+function renderAll(){renderVehicles();renderPhotos();renderDamage();renderReport();const v=currentVehicle();$('kpiPhotos').textContent=v?Object.values(v.photos||{}).reduce((n,p)=>n+(p.before?1:0)+(p.after?1:0),0):0;$('kpiDamage').textContent=v?(v.damages||[]).length:0}
+
+(async()=>{
+  const {data:sessionData}=await sb.auth.getSession();
+  if(sessionData.session)await enterApp(sessionData.session.user);
+})();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
+</script>
+</body>
+</html>
