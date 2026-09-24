@@ -33,47 +33,49 @@ button{font:inherit;border:0;border-radius:10px;padding:10px 14px;font-weight:75
 .report img{max-width:180px;max-height:150px;border-radius:8px;margin:4px}.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px}.stat b{font-size:22px;display:block}.install{display:none;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:11px;border-radius:11px;margin-bottom:12px}
 @media(max-width:650px){.two{grid-template-columns:1fr}.nav{grid-template-columns:repeat(5,minmax(72px,1fr));overflow:auto}.photos{grid-template-columns:repeat(2,1fr)}.vehicle{flex-direction:column;align-items:flex-start}.statgrid{grid-template-columns:1fr 1fr}}
 @media print{header,.nav,.no-print{display:none!important}body{background:#fff}.card{box-shadow:none;border:0}}
+
+.photo-parts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.photo-part{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}
+.photo-part h4{margin:0 0 7px;font-size:13px}
+.photo-part .pair{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.photo-part input{font-size:12px;padding:8px}
+.photo-part .thumb{margin-top:7px;display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.photo-part img{width:100%;height:95px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.photo-part small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.damage-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.damage-zone{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px}
+.damage-zone h4{margin:0 0 8px;font-size:13px}
+.damage-zone button{width:100%;margin-top:6px}
+.wheel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.wheel-card{border:1px solid #d1d5db;border-radius:10px;padding:9px;background:#f8fafc}
+.wheel-card strong{display:block;margin-bottom:6px}
+.wheel-card .wheel-photo{width:100%;height:100px;object-fit:cover;border-radius:8px;background:#e5e7eb}
+.damage-summary{margin-top:12px}
+.damage-item{display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid #fecaca;background:#fffafa;border-radius:10px;padding:9px;margin:6px 0}
+@media(max-width:650px){.photo-parts,.damage-grid{grid-template-columns:1fr}}
+
 </style>
 
-<!-- AutoCheck Supabase Auth -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 #authGate{position:fixed;inset:0;z-index:99999;background:#f3f6fa;display:flex;align-items:center;justify-content:center;padding:18px}
 #authCard{width:min(430px,100%);background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:22px;box-shadow:0 8px 30px #0002}
-#authCard h2{margin:0 0 8px;font-size:24px}
-#authCard p{color:#6b7280;margin:0 0 18px}
+#authCard h2{margin:0 0 8px;font-size:24px}#authCard p{color:#6b7280;margin:0 0 18px}
 #authCard label{display:block;font-size:12px;font-weight:800;margin:10px 0 5px}
-#authCard input{width:100%;padding:11px 12px;border:1px solid #d1d5db;border-radius:10px;font:inherit;background:#fff}
-#authButtons{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-#authButtons button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:750;cursor:pointer}
-#authLogin{background:#1677ff;color:#fff}
-#authSignup{background:#e8edf3;color:#111827}
+#authCard input{width:100%;padding:11px 12px;border:1px solid #d1d5db;border-radius:10px;font:inherit}
+#authButtons{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}#authButtons button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:750}
+#authLogin{background:#1677ff;color:#fff}#authSignup{background:#e8edf3}
 #authMsg{margin-top:10px;padding:10px;border-radius:10px;font-size:13px;display:none}
-#authMsg.error{display:block;background:#fee2e2;color:#991b1b}
-#authMsg.ok{display:block;background:#dcfce7;color:#166534}
-#appLogout{position:fixed;right:14px;top:14px;z-index:9999;display:none;border:0;border-radius:10px;padding:8px 12px;font-weight:750;background:#fff;color:#111827;box-shadow:0 2px 10px #0002}
+#authMsg.error{display:block;background:#fee2e2;color:#991b1b}#authMsg.ok{display:block;background:#dcfce7;color:#166534}
 body.auth-locked>header,body.auth-locked>main{display:none!important}
 </style>
-
 </head>
 <body>
-
-<div id="authGate">
-  <div id="authCard">
-    <h2>AutoCheck</h2>
-    <p>Bitte anmelden oder Konto erstellen.</p>
-    <label>E-Mail</label>
-    <input id="acEmail" type="email" autocomplete="email" placeholder="name@firma.de">
-    <label>Passwort</label>
-    <input id="acPassword" type="password" autocomplete="current-password" placeholder="Passwort">
-    <div id="authMsg"></div>
-    <div id="authButtons">
-      <button id="authLogin" type="button">Anmelden</button>
-      <button id="authSignup" type="button">Konto erstellen</button>
-    </div>
-  </div>
-</div>
-<button id="appLogout" type="button">Abmelden</button>
+<div id="authGate"><div id="authCard"><h2>AutoCheck</h2><p>Bitte anmelden oder Konto erstellen.</p>
+<label>E-Mail</label><input id="acEmail" type="email" autocomplete="email" placeholder="name@firma.de">
+<label>Passwort</label><input id="acPassword" type="password" autocomplete="current-password" placeholder="Passwort">
+<div id="authMsg"></div><div id="authButtons"><button id="authLogin">Anmelden</button><button id="authSignup">Konto erstellen</button></div>
+</div></div>
 
 <header><div class="brand"><div class="logo">🚗</div><div><h1>AutoCheck</h1><p>Fahrzeug-Übergabe & Schadendokumentation</p></div></div></header>
 <main>
@@ -90,38 +92,70 @@ body.auth-locked>header,body.auth-locked>main{display:none!important}
 <div class="card"><h2>Meine Fahrzeuge</h2><div id="vehicles"></div></div>
 </section>
 
+
 <section id="handover" class="hidden">
-<div class="card"><h2>📸 Übergabe</h2><div id="hv" class="notice"></div>
+<div class="card"><h2>📸 Übergabe – Fahrzeug rundum</h2><div id="hv" class="notice"></div>
 <div class="two"><div><label>Fahrer</label><input id="driver" placeholder="Name"></div><div><label>Kilometerstand</label><input id="hkm" type="number"></div></div>
-<label>Fotos vor der Fahrt</label><input id="before" type="file" accept="image/*" capture="environment" multiple><div id="beforeOut" class="photos"></div>
+<p class="muted">Für jeden Bereich kannst du ein Foto aufnehmen. Bei der Rückgabe wird derselbe Bereich erneut fotografiert – so sind vorher/nachher direkt vergleichbar.</p>
+<div id="photoPartsBefore" class="photo-parts"></div>
 <label>Allgemeiner Zustand</label><textarea id="hnote" placeholder="z. B. sauber, keine weiteren Schäden..."></textarea>
 <div class="actions"><button class="primary" onclick="saveHandover()">Übergabe abschließen</button></div></div>
 </section>
 
+
 <section id="return" class="hidden">
-<div class="card"><h2>🔎 Rückgabe</h2><div id="rv" class="notice"></div>
+<div class="card"><h2>🔎 Rückgabe – vorher / nachher</h2><div id="rv" class="notice"></div>
 <div class="two"><div><label>Kilometerstand</label><input id="rkm" type="number"></div><div><label>Rückgabe</label><input id="rdate" type="datetime-local"></div></div>
-<label>Fotos bei Rückgabe</label><input id="after" type="file" accept="image/*" capture="environment" multiple><div id="afterOut" class="photos"></div>
-<p class="muted">Neue Schäden werden im nächsten Schritt auf der Fahrzeug-Silhouette markiert.</p>
-<div class="actions"><button class="primary" onclick="goDamage()">Schäden erfassen →</button></div></div>
+<p class="muted">Fotografiere jeden Bereich erneut. Die Bilder stehen später im Protokoll als Vorher/Nachher-Paar.</p>
+<div id="photoPartsAfter" class="photo-parts"></div>
+<div class="actions"><button class="primary" onclick="goDamage()">Weiter zu Schäden →</button></div></div>
 </section>
 
+
+
 <section id="damage" class="hidden">
-<div class="card"><h2>⚠️ Schäden markieren</h2><div id="dv" class="notice"></div>
-<div class="silhouette-wrap">
+<div class="card"><h2>⚠️ Schäden – präzise erfassen</h2><div id="dv" class="notice"></div>
+<div class="notice">Tippe direkt auf einen Bereich oder auf eine einzelne Felge. Jede Stelle kann separat beschrieben und fotografiert werden.</div>
+
+<div class="damage-grid">
+  <div class="damage-zone">
+    <h4>🚗 Karosserie</h4>
+    <button class="soft" onclick="quickDamage('Front')">Front</button>
+    <button class="soft" onclick="quickDamage('Heck')">Heck</button>
+    <button class="soft" onclick="quickDamage('Linke Seite')">Linke Seite</button>
+    <button class="soft" onclick="quickDamage('Rechte Seite')">Rechte Seite</button>
+    <button class="soft" onclick="quickDamage('Dach')">Dach</button>
+    <button class="soft" onclick="quickDamage('Scheibe')">Scheibe</button>
+  </div>
+  <div class="damage-zone">
+    <h4>🛞 Jede Felge einzeln</h4>
+    <div class="wheel-grid">
+      <div class="wheel-card"><strong>Vorne links</strong><input type="file" accept="image/*" capture="environment" onchange="wheelPhoto(this,'Felge vorne links')"></div>
+      <div class="wheel-card"><strong>Vorne rechts</strong><input type="file" accept="image/*" capture="environment" onchange="wheelPhoto(this,'Felge vorne rechts')"></div>
+      <div class="wheel-card"><strong>Hinten links</strong><input type="file" accept="image/*" capture="environment" onchange="wheelPhoto(this,'Felge hinten links')"></div>
+      <div class="wheel-card"><strong>Hinten rechts</strong><input type="file" accept="image/*" capture="environment" onchange="wheelPhoto(this,'Felge hinten rechts')"></div>
+    </div>
+  </div>
+</div>
+
+<div class="silhouette-wrap" style="margin-top:12px">
 <svg id="carSvg" viewBox="0 0 800 480" role="img" aria-label="Fahrzeug von oben">
 <path class="car-body" d="M145 120 Q180 70 275 58 L525 58 Q620 70 655 120 L705 185 Q725 215 705 245 L655 360 Q625 405 545 415 L255 415 Q175 405 145 360 L95 245 Q75 215 95 185 Z"/>
 <path class="car-window" d="M230 105 Q250 78 300 72 L500 72 Q550 78 570 105 L535 175 L265 175 Z"/>
 <path class="car-window" d="M265 190 L535 190 L560 335 Q540 365 505 370 L295 370 Q260 365 240 335 Z"/>
 <rect class="car-window" x="290" y="190" width="220" height="35" rx="8"/>
-<circle class="wheel" cx="120" cy="155" r="32"/><circle class="wheel" cx="680" cy="155" r="32"/><circle class="wheel" cx="120" cy="325" r="32"/><circle class="wheel" cx="680" cy="325" r="32"/>
+<circle class="wheel" cx="120" cy="155" r="32"/><circle class="wheel" cx="680" cy="155" r="32"/>
+<circle class="wheel" cx="120" cy="325" r="32"/><circle class="wheel" cx="680" cy="325" r="32"/>
 <text x="400" y="42" text-anchor="middle" fill="#64748b" font-size="16" font-weight="700">VORNE ↑</text>
 <g id="markers"></g>
 </svg></div>
+
 <div class="legend"><span><i class="dot new"></i> Neuer Schaden</span><span><i class="dot old"></i> Bereits vorhanden</span></div>
-<div id="damageList"></div>
-<div class="actions"><button class="soft" onclick="clearDamage()">Markierungen löschen</button><button class="primary" onclick="saveDamageSession()">Schäden speichern</button></div></div>
+<div id="damageList" class="damage-summary"></div>
+<div class="actions"><button class="soft" onclick="clearDamage()">Markierungen löschen</button><button class="primary" onclick="saveDamageSession()">Schäden speichern</button></div>
+</div>
 </section>
+
 
 <section id="report" class="hidden"><div class="card"><h2>📄 Protokoll</h2><div id="reportOut" class="report"></div><div class="actions no-print"><button class="primary" onclick="window.print()">Drucken / PDF speichern</button></div></div></section>
 </main>
@@ -150,6 +184,45 @@ $('carSvg').addEventListener('click',e=>{if(e.target.closest('.marker'))return;l
 );
 function clearDamage(){let v=active();if(v){state.damages=state.damages.filter(d=>d.vehicleId!==v.id);persist()}}
 function saveDamageSession(){let v=active();if(!v)return;state.return=state.return||{};state.return.damages=state.damages.filter(d=>d.vehicleId===v.id);persist();alert('Schäden gespeichert.')}
+
+const photoAreas=['Front','Heck','Linke Seite','Rechte Seite','Dach','Windschutzscheibe','Motorhaube','Kofferraum','Innenraum vorne','Innenraum hinten'];
+let partBefore={},partAfter={},wheelPhotos={};
+
+function makePartPhotoCards(targetId, store, phase){
+  const root=$(targetId); if(!root)return;
+  root.innerHTML=photoAreas.map(a=>`<div class="photo-part">
+    <h4>${esc(a)}</h4>
+    <div class="pair">
+      <div><small>Vorher</small><input type="file" accept="image/*" capture="environment" onchange="partPhoto(this,'${a}','before')"></div>
+      <div><small>Nachher</small><input type="file" accept="image/*" capture="environment" onchange="partPhoto(this,'${a}','after')"></div>
+    </div>
+    <div class="thumb" id="thumb-${phase}-${CSS.escape(a).replace(/[^a-zA-Z0-9]/g,'-')}"></div>
+  </div>`).join('');
+}
+async function readPhoto(file){
+  return await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});
+}
+async function partPhoto(input,area,phase){
+  const f=input.files?.[0]; if(!f)return;
+  const data=await readPhoto(f);
+  const obj={name:f.name,data};
+  if(phase==='before')partBefore[area]=obj; else partAfter[area]=obj;
+  const id='thumb-'+phase+'-'+area.replace(/[^a-zA-Z0-9]/g,'-');
+  const box=document.getElementById(id); if(box)box.innerHTML=`<img src="${data}" alt="${esc(area)}">`;
+}
+async function wheelPhoto(input,area){
+  const f=input.files?.[0]; if(!f)return;
+  wheelPhotos[area]={name:f.name,data:await readPhoto(f)};
+  const card=input.closest('.wheel-card');
+  let img=card.querySelector('.wheel-photo');
+  if(!img){img=document.createElement('img');img.className='wheel-photo';card.appendChild(img)}
+  img.src=wheelPhotos[area].data;
+  const d={vehicleId:active()?.id,x:area.includes('links')?120:680,y:area.includes('Vorne')?155:325,position:area,existing:false,description:'Foto der Felge'};
+  state.damages=state.damages.filter(x=>!(x.vehicleId===d.vehicleId && x.position===area));
+  state.damages.push(d);persist();
+}
+function quickDamage(area){addMarker(400,area==='Front'?105:area==='Heck'?375:area==='Linke Seite'?220:580,area)}
+
 function report(){let v=active();if(!v){$('reportOut').innerHTML='<p class="muted">Kein Fahrzeug ausgewählt.</p>';return}let h=state.handover?.vehicleId===v.id?state.handover:null,r=state.return?.vehicleId===v.id?state.return:null,ds=state.damages.filter(d=>d.vehicleId===v.id);let imgs=a=>(a||[]).map(p=>`<img src="${p.data}" alt="">`).join('');
 $('reportOut').innerHTML=`<h3>${esc(v.make)} · ${esc(v.plate)}</h3><div class="statgrid"><div class="stat"><span class="muted">Ausgangs-KM</span><b>${esc(v.km||'-')}</b></div><div class="stat"><span class="muted">Übergabe-KM</span><b>${esc(h?.km||'-')}</b></div><div class="stat"><span class="muted">Rückgabe-KM</span><b>${esc(r?.km||'-')}</b></div></div>
 ${h?`<h3>Übergabe</h3><p>Fahrer: <b>${esc(h.driver)}</b> · ${new Date(h.date).toLocaleString('de-DE')}</p><p>${esc(h.note||'')}</p>${imgs(h.photos)}`:'<div class="notice">Noch keine Übergabe.</div>'}
@@ -159,62 +232,17 @@ function render(){let v=active();$('vehicles').innerHTML=state.vehicles.length?s
 function removeDamage(i){let v=active(),list=state.damages.filter(d=>d.vehicleId===v.id),target=list[i];state.damages=state.damages.filter(d=>d!==target);persist()}
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('install').style.display='block'});function installApp(){if(deferred){deferred.prompt();deferred=null;$('install').style.display='none'}}
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
-render();
+makePartPhotoCards('photoPartsBefore',partBefore,'before');makePartPhotoCards('photoPartsAfter',partAfter,'after');render();
 </script>
 
 <script>
-(() => {
-  const AC_URL = 'https://nskguwvyysavbyjwkmez.supabase.co';
-  const AC_KEY = 'sb_publishable_o_LiCB2j8r1KWCunkBiggQ_7Co6LBr9';
-  const supabase = window.supabase.createClient(AC_URL, AC_KEY);
-
-  document.body.classList.add('auth-locked');
-  const gate = document.getElementById('authGate');
-  const logout = document.getElementById('appLogout');
-  const email = document.getElementById('acEmail');
-  const password = document.getElementById('acPassword');
-  const msg = document.getElementById('authMsg');
-
-  function showMsg(text, ok=false) {
-    msg.textContent = text;
-    msg.className = ok ? 'ok' : 'error';
-  }
-  function openApp() {
-    gate.style.display = 'none';
-    logout.style.display = 'block';
-    document.body.classList.remove('auth-locked');
-  }
-
-  document.getElementById('authLogin').onclick = async () => {
-    showMsg('');
-    msg.className = '';
-    const e = email.value.trim(), p = password.value;
-    if (!e || !p) return showMsg('Bitte E-Mail und Passwort eingeben.');
-    const { error } = await supabase.auth.signInWithPassword({ email:e, password:p });
-    if (error) return showMsg(error.message);
-    openApp();
-  };
-
-  document.getElementById('authSignup').onclick = async () => {
-    showMsg('');
-    msg.className = '';
-    const e = email.value.trim(), p = password.value;
-    if (!e || p.length < 6) return showMsg('Bitte E-Mail und ein Passwort mit mindestens 6 Zeichen eingeben.');
-    const { data, error } = await supabase.auth.signUp({ email:e, password:p });
-    if (error) return showMsg(error.message);
-    if (!data.session) return showMsg('Konto erstellt. Bitte die Bestätigungs-E-Mail öffnen und danach anmelden.', true);
-    openApp();
-  };
-
-  logout.onclick = async () => {
-    await supabase.auth.signOut();
-    location.reload();
-  };
-
-  supabase.auth.getSession().then(({data}) => {
-    if (data.session) openApp();
-  });
+(()=>{const sb=window.supabase.createClient('https://nskguwvyysavbyjwkmez.supabase.co','sb_publishable_o_LiCB2j8r1KWCunkBiggQ_7Co6LBr9');
+document.body.classList.add('auth-locked');const g=document.getElementById('authGate'),e=document.getElementById('acEmail'),p=document.getElementById('acPassword'),m=document.getElementById('authMsg');
+const show=(t,ok=false)=>{m.textContent=t;m.className=ok?'ok':'error'};
+const open=()=>{g.style.display='none';document.body.classList.remove('auth-locked')};
+document.getElementById('authLogin').onclick=async()=>{m.className='';const {error}=await sb.auth.signInWithPassword({email:e.value.trim(),password:p.value});if(error)show(error.message);else open()};
+document.getElementById('authSignup').onclick=async()=>{m.className='';if(p.value.length<6)return show('Bitte ein Passwort mit mindestens 6 Zeichen eingeben.');const {data,error}=await sb.auth.signUp({email:e.value.trim(),password:p.value});if(error)return show(error.message);if(!data.session)return show('Konto erstellt. Bitte Bestätigungs-E-Mail öffnen und danach anmelden.',true);open()};
+sb.auth.getSession().then(({data})=>{if(data.session)open()});
 })();
 </script>
-
 </body></html>
