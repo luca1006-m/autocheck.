@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AutoCheck — Fahrzeugprüfung</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#07101c;--bg2:#0c1726;--card:rgba(17,29,46,.82);--card2:#132239;
+  --line:rgba(255,255,255,.09);--text:#f5f8fc;--muted:#91a0b5;
+  --accent:#6c7cff;--accent2:#45d3b0;--danger:#ff6378;--warn:#ffbd5c;
+  --shadow:0 18px 55px rgba(0,0,0,.28);--r:22px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;background:
+radial-gradient(900px 500px at 90% -10%,rgba(108,124,255,.23),transparent 60%),
+radial-gradient(700px 450px at -10% 20%,rgba(69,211,176,.12),transparent 58%),var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{border:0;color:inherit}
+.app{max-width:1180px;margin:auto;padding:20px 18px 110px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 0 22px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#7785ff,#43d8b2);box-shadow:0 12px 30px rgba(108,124,255,.25);font-weight:900}
+.brand h1{font-size:18px;margin:0}.brand small{display:block;color:var(--muted);margin-top:2px}
+.top-actions{display:flex;gap:8px}.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;cursor:pointer}
+.iconbtn:hover,.navbtn:hover{background:var(--card2)}
+.hero{display:grid;grid-template-columns:1.35fr .65fr;gap:16px;margin-bottom:16px}
+.card{background:linear-gradient(180deg,rgba(20,34,54,.88),rgba(13,24,39,.88));border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);backdrop-filter:blur(18px)}
+.hero-main{padding:25px}
+.kicker{font-size:12px;color:#9eabff;text-transform:uppercase;letter-spacing:.13em;font-weight:800}
+.hero h2{font-size:32px;line-height:1.05;margin:8px 0 10px}.hero p{color:var(--muted);margin:0;line-height:1.5}
+.vehicle-pill{margin-top:20px;padding:15px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.035);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.plate{font-weight:900;letter-spacing:.08em;font-size:18px}.sub{color:var(--muted);font-size:13px}
+.progress-card{padding:22px;display:flex;flex-direction:column;justify-content:space-between}
+.progress-ring{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;margin:auto;background:conic-gradient(var(--accent) var(--p,0%),rgba(255,255,255,.08) 0);position:relative}
+.progress-ring:after{content:"";position:absolute;inset:9px;border-radius:50%;background:#0d1a2b}.progress-ring b{position:relative;z-index:1;font-size:25px}
+.progress-card .sub{text-align:center;margin-top:10px}
+.section-title{display:flex;align-items:end;justify-content:space-between;margin:28px 0 12px}.section-title h3{margin:0;font-size:21px}.section-title span{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.stat{padding:18px;min-height:132px}.stat .emoji{font-size:24px}.stat b{display:block;font-size:27px;margin:12px 0 3px}.stat small{color:var(--muted)}
+.tabs{display:flex;gap:7px;overflow:auto;padding:6px;margin:10px 0 18px;position:sticky;top:0;z-index:5;background:rgba(7,16,28,.78);backdrop-filter:blur(18px);border-radius:18px}
+.navbtn{white-space:nowrap;padding:11px 15px;border-radius:13px;background:transparent;color:var(--muted);cursor:pointer;font-weight:700}.navbtn.active{background:rgba(108,124,255,.18);color:#dce0ff;border:1px solid rgba(108,124,255,.3)}
+.page{display:none}.page.active{display:block}
+.panel{padding:20px}.panel h3{margin:0 0 6px}.panel p{color:var(--muted);margin:0 0 18px}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.field label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px}.field input,.field select,.field textarea{width:100%;background:#0b1727;border:1px solid var(--line);color:var(--text);border-radius:13px;padding:13px 14px;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(108,124,255,.65);box-shadow:0 0 0 3px rgba(108,124,255,.1)}
+.btnrow{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}.btn{padding:12px 16px;border-radius:13px;background:#17273d;border:1px solid var(--line);cursor:pointer;font-weight:800}.btn.primary{background:linear-gradient(135deg,#6977ff,#5967e8);box-shadow:0 10px 25px rgba(89,103,232,.25)}.btn.success{background:linear-gradient(135deg,#39caa9,#26a989)}.btn.danger{background:rgba(255,99,120,.12);color:#ff9bab;border-color:rgba(255,99,120,.25)}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.photo-card{overflow:hidden;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.025)}
+.photo-head{padding:14px 14px 10px;display:flex;justify-content:space-between;gap:8px}.photo-head b{font-size:14px}.photo-head span{font-size:11px;color:var(--muted)}
+.photo-slot{margin:0 12px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}.photo-box{position:relative;min-height:132px;border-radius:14px;background:#081320;border:1px dashed rgba(255,255,255,.13);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.photo-box img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}.photo-box .ph{position:relative;text-align:center;color:var(--muted);font-size:11px;padding:12px}.camera{position:absolute;right:8px;bottom:8px;z-index:2;padding:7px 9px;border-radius:10px;background:rgba(0,0,0,.6);cursor:pointer}.photo-box input{display:none}
+.tag{padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800;background:rgba(69,211,176,.12);color:#73e4c8}.tag.warn{background:rgba(255,189,92,.12);color:#ffd080}.tag.red{background:rgba(255,99,120,.12);color:#ff9bab}
+.damage-layout{display:grid;grid-template-columns:1fr 1fr;gap:15px}.car-panel{padding:15px}.car-svg{width:100%;max-height:500px}.zone{cursor:pointer}.zone:hover rect,.zone.selected rect{fill:rgba(108,124,255,.32);stroke:#98a3ff}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.legend span{font-size:11px;color:var(--muted);display:flex;gap:5px;align-items:center}.dot{width:9px;height:9px;border-radius:50%;display:inline-block}.dnew{background:var(--danger)}.dold{background:var(--warn)}.dnone{background:#43d8b2}
+.damage-list{display:flex;flex-direction:column;gap:10px}.damage-item{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}.damage-item header{display:flex;justify-content:space-between}.damage-item p{margin:8px 0 0;color:var(--muted);font-size:13px}.wheel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.wheel{padding:14px;border:1px solid var(--line);border-radius:16px;background:#0a1625}.wheel b{display:block;margin-bottom:8px}.wheel .mini{height:85px;border-radius:12px;background:#07111e;border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:11px;overflow:hidden;position:relative}.wheel img{width:100%;height:100%;object-fit:cover}.wheel input{display:none}
+.timeline{display:flex;flex-direction:column;gap:10px}.event{display:grid;grid-template-columns:85px 1fr;gap:12px}.event time{color:var(--muted);font-size:12px;padding-top:4px}.event .eventbox{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}.eventbox b{display:block}.eventbox span{color:var(--muted);font-size:13px}
+.bottom{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);width:min(650px,calc(100% - 20px));z-index:20;padding:7px;border:1px solid var(--line);border-radius:20px;background:rgba(10,19,32,.88);backdrop-filter:blur(20px);box-shadow:0 18px 50px rgba(0,0,0,.4);display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.bottom button{background:none;color:var(--muted);padding:8px 4px;border-radius:14px;cursor:pointer;font-size:11px}.bottom button.active{background:rgba(108,124,255,.16);color:#dce0ff}.bottom i{font-style:normal;display:block;font-size:18px;margin-bottom:3px}
+.toast{position:fixed;top:18px;left:50%;transform:translate(-50%,-130%);transition:.25s;z-index:100;background:#14253a;border:1px solid var(--line);padding:13px 17px;border-radius:14px;box-shadow:var(--shadow)}.toast.show{transform:translate(-50%,0)}
+.overlay{position:fixed;inset:0;background:radial-gradient(700px 400px at 50% 0,rgba(108,124,255,.22),transparent 60%),#07101c;display:grid;place-items:center;z-index:200;padding:20px}.login{width:min(440px,100%);padding:26px}.login .logo{margin-bottom:20px}.login h2{margin:0 0 7px;font-size:28px}.login p{color:var(--muted);line-height:1.5}.login .field{margin-top:13px}.login .btn{width:100%;margin-top:10px}.login .hint{font-size:11px;text-align:center;color:var(--muted);margin-top:15px}
+.empty{padding:32px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:18px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:150;display:none;align-items:end;justify-content:center;padding:12px}.modal.show{display:flex}.sheet{width:min(620px,100%);background:#0e1b2c;border:1px solid var(--line);border-radius:24px 24px 18px 18px;padding:20px;max-height:88vh;overflow:auto}.sheethead{display:flex;justify-content:space-between;align-items:center}.sheet h3{margin:0}.close{background:#17273d;border-radius:11px;width:38px;height:38px;cursor:pointer}
+@media(max-width:850px){.hero{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.photo-grid{grid-template-columns:1fr 1fr}.damage-layout{grid-template-columns:1fr}}
+@media(max-width:560px){.app{padding:12px 12px 100px}.brand small{display:none}.hero h2{font-size:27px}.grid,.photo-grid,.formgrid{grid-template-columns:1fr}.photo-slot{min-height:130px}.bottom{bottom:7px}.tabs{top:0}.stat{min-height:115px}.progress-card{min-height:180px}.wheel-grid{grid-template-columns:1fr 1fr}}
+
+.savebar{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:11px 13px;margin:0 0 15px;position:sticky;top:58px;z-index:6}
+.savebar b{display:block;font-size:13px}.savebar span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.multi-photos{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:0 12px 8px}
+.multi-photos .photo-box{min-height:120px;margin:0}
+.photo-box.filled{border-style:solid;border-color:rgba(108,124,255,.35)}
+.photo-delete{position:absolute;top:7px;left:7px;z-index:4;width:28px;height:28px;border-radius:9px;background:rgba(0,0,0,.68);color:white;cursor:pointer}
+.photo-footer{padding:0 14px 14px;color:var(--muted);font-size:10px}
+.damage-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.damage-summary div{padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.025)}
+.damage-summary b{font-size:20px;display:block}.damage-summary span{font-size:10px;color:var(--muted)}
+.damage-item header{align-items:flex-start}.damage-item header small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.damage-actions{display:flex;gap:7px;margin-top:10px}.damage-actions button{border:1px solid var(--line);background:#15253a;color:#b9c5d8;border-radius:9px;padding:7px 10px;font-size:11px;cursor:pointer}
+@media(max-width:560px){.savebar{top:53px}.savebar span{display:none}.savebar .btn{padding:10px 12px}.multi-photos .photo-box{min-height:105px}}
+
+.langselect{height:44px;max-width:150px;border-radius:13px;background:var(--card);border:1px solid var(--line);color:var(--text);padding:0 10px;outline:none;font-weight:700;cursor:pointer}
+.langselect option{background:#0e1b2c;color:white}
+html[dir="rtl"] .topbar,html[dir="rtl"] .section-title,html[dir="rtl"] .vehicle-pill{direction:rtl}
+html[dir="rtl"] .top-actions{flex-direction:row-reverse}
+@media(max-width:560px){.langselect{max-width:108px;font-size:11px}.top-actions{gap:5px}}
+
+/* Premium layer */
+body{background:radial-gradient(1000px 600px at 100% -15%,rgba(102,118,255,.28),transparent 58%),radial-gradient(800px 500px at -10% 30%,rgba(45,211,174,.13),transparent 55%),linear-gradient(180deg,#050b14,#081321 48%,#07111d)}
+.card{background:linear-gradient(145deg,rgba(20,34,55,.94),rgba(10,20,34,.94));border-color:rgba(255,255,255,.075);box-shadow:0 20px 65px rgba(0,0,0,.27)}
+.hero-main{padding:30px;background:radial-gradient(500px 260px at 100% 0,rgba(108,124,255,.18),transparent 65%),linear-gradient(145deg,rgba(24,39,64,.96),rgba(10,20,34,.96))}
+.hero h2{letter-spacing:-.04em}.logo{background:linear-gradient(135deg,#8290ff,#5f70f4 48%,#42d3b0);box-shadow:0 15px 40px rgba(92,108,244,.35)}
+.stat{transition:transform .18s,box-shadow .18s}.stat:hover{transform:translateY(-2px);box-shadow:0 22px 50px rgba(0,0,0,.3)}
+.photo-card{background:linear-gradient(160deg,rgba(21,36,57,.95),rgba(10,20,33,.95));transition:.2s}.photo-card:hover{transform:translateY(-2px);border-color:rgba(116,130,255,.3)}
+.photo-box{min-height:145px;background:linear-gradient(145deg,#07111e,#0c1a2b)}
+.photo-actions{position:absolute;right:7px;bottom:7px;z-index:5;display:flex;gap:5px}.photo-actions .camera,.photo-actions .gallery{position:static;width:35px;height:35px;padding:0;display:grid;place-items:center;border-radius:10px;cursor:pointer}.photo-actions .camera{background:linear-gradient(135deg,#6474f7,#4354d7);box-shadow:0 8px 20px rgba(67,84,215,.35)}.photo-actions .gallery{background:rgba(14,27,43,.94);border:1px solid rgba(255,255,255,.1)}.photo-actions input{display:none}
+.savebar{background:linear-gradient(90deg,rgba(18,31,50,.96),rgba(13,25,41,.96));box-shadow:0 15px 40px rgba(0,0,0,.22)}
+.damage-item,.wheel{background:linear-gradient(145deg,rgba(22,37,57,.88),rgba(11,21,34,.88));transition:.18s}.damage-item:hover,.wheel:hover{transform:translateY(-2px);border-color:rgba(108,124,255,.25)}
+.language-trigger{height:44px;min-width:82px;padding:0 11px;border-radius:14px;background:rgba(18,31,49,.9);border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;gap:7px;color:#f5f8fc;font-weight:800;cursor:pointer}
+.language-trigger .chev{color:#8f9db1}.language-menu{position:fixed;top:72px;right:18px;width:min(360px,calc(100vw - 28px));max-height:min(650px,calc(100vh - 90px));overflow:hidden;z-index:80;display:none;background:rgba(10,20,34,.98);border:1px solid rgba(255,255,255,.1);border-radius:22px;box-shadow:0 30px 90px rgba(0,0,0,.55);backdrop-filter:blur(25px)}.language-menu.show{display:block;animation:menuIn .18s ease}@keyframes menuIn{from{opacity:0;transform:translateY(-7px) scale(.98)}to{opacity:1;transform:none}}
+.language-menu-head{display:flex;justify-content:space-between;align-items:center;padding:17px 18px 12px}.language-menu-head b{display:block}.language-menu-head span{font-size:11px;color:var(--muted)}.language-menu-head button{width:34px;height:34px;border-radius:10px;background:#16273c;color:#fff;cursor:pointer;font-size:20px}
+.language-search{margin:0 14px 10px;height:43px;border-radius:13px;background:#081522;border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;padding:0 12px;gap:8px}.language-search span{font-size:20px;color:#8190a5}.language-search input{flex:1;border:0;outline:0;background:none;color:#fff;font-size:14px}.language-options{padding:4px 10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:460px;overflow:auto}.language-option{display:flex;align-items:center;gap:9px;padding:11px;border-radius:13px;background:transparent;border:1px solid transparent;color:#eaf0f8;text-align:left;cursor:pointer}.language-option:hover{background:rgba(255,255,255,.05)}.language-option.selected{background:rgba(108,124,255,.13);border-color:rgba(108,124,255,.28)}.language-option .flag{font-size:20px}.language-option small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.compare-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.compare-row b{display:block;font-size:12px}.compare-row span{display:block;color:var(--muted);font-size:10px;margin:2px 0 7px}.compare-row img,.compare-row em{display:block;width:100%;height:130px;border-radius:13px;object-fit:cover;background:#07111e;border:1px solid var(--line)}.compare-row em{display:grid;place-items:center;color:var(--muted);font-style:normal;font-size:11px}
+@media(max-width:560px){.language-menu{right:10px;top:64px}.language-options{grid-template-columns:1fr 1fr}.language-trigger{min-width:68px}.language-trigger span:nth-child(2){display:none}.compare-row{gap:7px}.compare-row img,.compare-row em{height:105px}}
+
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<div id="loginOverlay" class="overlay">
+  <div class="login card">
+    <div class="logo">✓</div>
+    <h2>AutoCheck</h2>
+    <p>Professionelle Fahrzeug-Übergabe, Rückgabe und Schadendokumentation — direkt auf deinem Smartphone.</p>
+    <div class="field"><label>E-Mail</label><input id="email" type="email" autocomplete="email" placeholder="name@beispiel.de"></div>
+    <div class="field"><label>Passwort</label><input id="password" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+    <button class="btn primary" onclick="login()">Anmelden</button>
+    <button class="btn" onclick="signup()">Konto erstellen</button>
+    <div class="hint">Deine Zugangsdaten werden sicher über Supabase verarbeitet.</div>
+  </div>
+</div>
+
+<div id="app" class="app" style="display:none">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">✓</div>
+      <div><h1 data-i18n="brand">AutoCheck</h1><small data-i18n="brandSub">Fahrzeugprüfung & Dokumentation</small></div>
+    </div>
+    <div class="top-actions">
+      <button class="language-trigger" onclick="toggleLanguageMenu()" aria-label="Sprache auswählen"><span id="langFlag">🇩🇪</span><span id="langShort">DE</span><span class="chev">⌄</span></button>
+      <div id="languageMenu" class="language-menu">
+        <div class="language-menu-head"><div><b>Sprache</b><span>App language</span></div><button onclick="toggleLanguageMenu()">×</button></div>
+        <div class="language-search"><span>⌕</span><input id="languageSearch" placeholder="Sprache suchen…" oninput="filterLanguages(this.value)"></div>
+        <div id="languageOptions" class="language-options"></div>
+      </div>
+      <button class="iconbtn" onclick="exportData()" title="Backup">↥</button>
+      <button class="iconbtn" onclick="syncNow()" title="Cloud laden">↻</button>
+      <button class="iconbtn" onclick="logout()" title="Abmelden">⇥</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <section class="card hero-main">
+      <div class="kicker" data-i18n="currentCheck">Aktuelle Prüfung</div>
+      <h2 id="heroTitle">Kein Fahrzeug angelegt</h2>
+      <p id="heroSub" data-i18n="heroEmpty">Lege zuerst ein Fahrzeug an und starte anschließend die Übergabe.</p>
+      <div class="vehicle-pill">
+        <div><div class="plate" id="heroPlate">—</div><div class="sub" id="heroMeta">Fahrzeugdaten fehlen</div></div>
+        <button class="btn" onclick="showPage('vehicle')" data-i18n="edit">Bearbeiten</button>
+      </div>
+    </section>
+    <section class="card progress-card">
+      <div class="progress-ring" id="ring" style="--p:0%"><b id="progress">0%</b></div>
+      <div class="sub" id="progressText">Noch keine Prüfung gestartet</div>
+    </section>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button class="navbtn active" data-page="home" data-i18n="overview">Übersicht</button>
+    <button class="navbtn" data-page="vehicle" data-i18n="vehicle">Fahrzeug</button>
+    <button class="navbtn" data-page="handover" data-i18n="handover">Übergabe</button>
+    <button class="navbtn" data-page="return" data-i18n="return">Rückgabe</button>
+    <button class="navbtn" data-page="damage" data-i18n="damage">Schäden</button>
+    <button class="navbtn" data-page="report" data-i18n="report">Protokoll</button>
+  </nav>
+  <div class="savebar card">
+    <div><b id="saveStatus">Bereit</b><span>Änderungen werden erst mit „Speichern“ auf diesem Gerät bestätigt.</span></div>
+    <button id="saveAllBtn" class="btn primary" onclick="saveAll()">☁ Änderungen speichern</button>
+  </div>
+
+  <main>
+    <section id="home" class="page active">
+      <div class="grid">
+        <div class="card stat"><div class="emoji">🚗</div><b id="sVehicle">0</b><small>Fahrzeug</small></div>
+        <div class="card stat"><div class="emoji">📸</div><b id="sPhotos">0 / 18</b><small>Fotos gesamt</small></div>
+        <div class="card stat"><div class="emoji">⚠️</div><b id="sDamage">0</b><small>Dokumentierte Schäden</small></div>
+      </div>
+      <div class="section-title"><h3 data-i18n="quickStart">Schnellstart</h3><span>Alles an einem Ort</span></div>
+      <div class="grid">
+        <button class="card stat" onclick="showPage('handover')" style="text-align:left;cursor:pointer"><div class="emoji">📋</div><b data-i18n="handover">Übergabe</b><small data-i18n="handoverDesc">Fotos und Zustand vor der Fahrt</small></button>
+        <button class="card stat" onclick="showPage('damage')" style="text-align:left;cursor:pointer"><div class="emoji">🔎</div><b data-i18n="damage">Schäden</b><small data-i18n="damageDesc">Karosserie und jede Felge einzeln</small></button>
+        <button class="card stat" onclick="showPage('report')" style="text-align:left;cursor:pointer"><div class="emoji">📄</div><b data-i18n="report">Protokoll</b><small data-i18n="reportDesc">Prüfung ansehen und drucken</small></button>
+      </div>
+    </section>
+
+    <section id="vehicle" class="page">
+      <div class="card panel">
+        <h3 data-i18n="vehicleData">Fahrzeugdaten</h3><p>Alle Angaben werden lokal auf diesem Gerät gespeichert und deinem Konto zugeordnet.</p>
+        <div class="formgrid">
+          <div class="field"><label>Marke & Modell</label><input id="vModel" placeholder="z. B. BMW 320d"></div>
+          <div class="field"><label>Kennzeichen</label><input id="vPlate" placeholder="AN-AB 123"></div>
+          <div class="field"><label>Baujahr</label><input id="vYear" placeholder="2024"></div>
+          <div class="field"><label>Farbe</label><input id="vColor" placeholder="Schwarz"></div>
+          <div class="field"><label>Kilometerstand</label><input id="vKm" type="number" placeholder="48210"></div>
+          <div class="field"><label>FIN / VIN</label><input id="vVin" placeholder="WBA..."></div>
+          <div class="field"><label>Fahrer / Kunde</label><input id="vDriver" placeholder="Max Mustermann"></div>
+          <div class="field"><label>Prüfer</label><input id="vInspector" placeholder="Name des Prüfers"></div>
+        </div>
+        <div class="btnrow"><button class="btn primary" onclick="saveVehicle()">Fahrzeug speichern</button><button class="btn danger" onclick="resetVehicle()">Daten zurücksetzen</button></div>
+      </div>
+    </section>
+
+    <section id="handover" class="page">
+      <div class="card panel">
+        <h3 data-i18n="handover">Übergabe</h3><p>Dokumentiere jeden Bereich vor der Fahrt. Jeder Bereich hat sein eigenes Vorher-Foto.</p>
+        <div class="formgrid">
+          <div class="field"><label>Kilometerstand bei Übergabe</label><input id="hKm" type="number"></div>
+          <div class="field"><label>Datum & Uhrzeit</label><input id="hDate" type="datetime-local"></div>
+          <div class="field" style="grid-column:1/-1"><label>Allgemeiner Zustand / Hinweise</label><textarea id="hNote" rows="3" placeholder="z. B. Fahrzeug sauber, Tank 3/4, Schlüssel übergeben ..."></textarea></div>
+        </div>
+      </div>
+      <div class="section-title"><h3>Fotodokumentation</h3><span>9 Bereiche · bis zu 4 Fotos je Bereich</span></div>
+      <div class="photo-grid" id="handoverPhotos"></div>
+    </section>
+
+    <section id="return" class="page">
+      <div class="card panel">
+        <h3 data-i18n="return">Rückgabe</h3><p>Vergleiche die Rückgabe mit der Übergabe. Neue Schäden werden separat dokumentiert.</p>
+        <div class="formgrid">
+          <div class="field"><label>Kilometerstand bei Rückgabe</label><input id="rKm" type="number"></div>
+          <div class="field"><label>Datum & Uhrzeit</label><input id="rDate" type="datetime-local"></div>
+          <div class="field" style="grid-column:1/-1"><label>Rückgabe / Hinweise</label><textarea id="rNote" rows="3" placeholder="z. B. Kilometer, Tankstand, neue Auffälligkeiten ..."></textarea></div>
+        </div>
+      </div>
+      <div class="section-title"><h3>Fotodokumentation</h3><span>9 Bereiche · bis zu 4 Fotos je Bereich</span></div>
+      <div class="photo-grid" id="returnPhotos"></div><div class="section-title"><h3>Vorher / Nachher</h3><span>Direkter Vergleich</span></div><div class="card panel" id="comparePanel"></div>
+    </section>
+
+    <section id="damage" class="page">
+      <div class="damage-layout">
+        <div class="card car-panel">
+          <div class="section-title" style="margin-top:0"><h3>Schadenkarte</h3><span>Bereich antippen</span></div>
+          <svg class="car-svg" viewBox="0 0 800 500" aria-label="Fahrzeugansicht">
+            <defs><linearGradient id="carG" x1="0" x2="1"><stop stop-color="#1c314b"/><stop offset="1" stop-color="#122338"/></linearGradient></defs>
+            <rect x="80" y="65" width="640" height="370" rx="110" fill="url(#carG)" stroke="#40546e" stroke-width="5"/>
+            <rect x="190" y="105" width="420" height="125" rx="50" fill="#0a1625" stroke="#3b506a" stroke-width="4"/>
+            <path d="M250 230h300l70 105H180z" fill="#102239" stroke="#3b506a" stroke-width="4"/>
+            <rect x="80" y="190" width="95" height="110" rx="22" fill="#102239" stroke="#40546e" stroke-width="4"/>
+            <rect x="625" y="190" width="95" height="110" rx="22" fill="#102239" stroke="#40546e" stroke-width="4"/>
+            <circle cx="145" cy="125" r="38" fill="#060d17" stroke="#61718a" stroke-width="7"/><circle cx="655" cy="125" r="38" fill="#060d17" stroke="#61718a" stroke-width="7"/>
+            <circle cx="145" cy="375" r="38" fill="#060d17" stroke="#61718a" stroke-width="7"/><circle cx="655" cy="375" r="38" fill="#060d17" stroke="#61718a" stroke-width="7"/>
+            <g id="zones">
+              <g class="zone" onclick="addDamage('Front')" data-zone="Front"><rect x="290" y="55" width="220" height="45" rx="18" fill="rgba(108,124,255,.08)" stroke="#4c6079" stroke-width="2"/><text x="400" y="83" fill="#b9c5d8" text-anchor="middle" font-size="16">FRONT</text></g>
+              <g class="zone" onclick="addDamage('Fahrerseite')" data-zone="Fahrerseite"><rect x="95" y="215" width="105" height="75" rx="15" fill="rgba(108,124,255,.08)" stroke="#4c6079" stroke-width="2"/><text x="147" y="257" fill="#b9c5d8" text-anchor="middle" font-size="13">LINKS</text></g>
+              <g class="zone" onclick="addDamage('Beifahrerseite')" data-zone="Beifahrerseite"><rect x="600" y="215" width="105" height="75" rx="15" fill="rgba(108,124,255,.08)" stroke="#4c6079" stroke-width="2"/><text x="652" y="257" fill="#b9c5d8" text-anchor="middle" font-size="13">RECHTS</text></g>
+              <g class="zone" onclick="addDamage('Heck')" data-zone="Heck"><rect x="290" y="400" width="220" height="45" rx="18" fill="rgba(108,124,255,.08)" stroke="#4c6079" stroke-width="2"/><text x="400" y="428" fill="#b9c5d8" text-anchor="middle" font-size="16">HECK</text></g>
+              <g class="zone" onclick="addDamage('Motorhaube')" data-zone="Motorhaube"><rect x="270" y="115" width="260" height="75" rx="22" fill="rgba(69,211,176,.05)" stroke="#4c6079" stroke-width="2"/><text x="400" y="157" fill="#b9c5d8" text-anchor="middle" font-size="13">MOTORHAUBE</text></g>
+              <g class="zone" onclick="addDamage('Kofferraum')" data-zone="Kofferraum"><rect x="270" y="320" width="260" height="65" rx="22" fill="rgba(69,211,176,.05)" stroke="#4c6079" stroke-width="2"/><text x="400" y="358" fill="#b9c5d8" text-anchor="middle" font-size="13">KOFFERRAUM</text></g>
+            </g>
+          </svg>
+          <div class="legend"><span><i class="dot dnew"></i> Neuer Schaden</span><span><i class="dot dold"></i> Bereits vorhanden</span><span><i class="dot dnone"></i> Ohne Auffälligkeit</span></div>
+        </div>
+        <div>
+          <div class="card panel">
+            <h3 data-i18n="damageTitle">Schäden & Auffälligkeiten</h3><p>Tippe auf einen Bereich der Fahrzeugkarte oder lege einen Eintrag manuell an.</p>
+            <div class="btnrow"><button class="btn primary" onclick="addDamage()">+ Schaden hinzufügen</button><button class="btn" onclick="clearDamages()">Liste leeren</button></div>
+            <div class="damage-list" id="damageList" style="margin-top:14px"></div>
+          </div>
+          <div class="section-title"><h3 data-i18n="wheelsTitle">Felgen einzeln</h3><span>4 Räder · eigene Fotos</span></div>
+          <div class="wheel-grid" id="wheelGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="report" class="page">
+      <div class="card panel">
+        <div class="section-title" style="margin-top:0"><h3 data-i18n="inspectionReport">Prüfprotokoll</h3><button class="btn primary" onclick="window.print()">PDF / Drucken</button></div>
+        <div id="reportContent"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="bottom" id="bottomNav">
+  <button data-page="home" class="active"><i>⌂</i><span data-i18n="overview">Übersicht</span></button>
+  <button data-page="handover"><i>📷</i><span data-i18n="handover">Übergabe</span></button>
+  <button data-page="return"><i>↩</i><span data-i18n="return">Rückgabe</span></button>
+  <button data-page="damage"><i>⚠</i><span data-i18n="damage">Schäden</span></button>
+  <button data-page="report"><i>▤</i><span data-i18n="report">Protokoll</span></button>
+</nav>
+
+<div id="damageModal" class="modal">
+  <div class="sheet">
+    <div class="sheethead"><h3>Schaden dokumentieren</h3><button class="close" onclick="closeModal()">×</button></div>
+    <div class="formgrid" style="margin-top:15px">
+      <div class="field"><label>Bereich</label><input id="dArea" placeholder="z. B. Fahrertür"></div>
+      <div class="field"><label>Status</label><select id="dStatus"><option>Neuer Schaden</option><option>Bereits vorhanden</option><option>Ohne Auffälligkeit</option></select></div>
+      <div class="field"><label>Art</label><select id="dType"><option>Kratzer</option><option>Delle</option><option>Lackschaden</option><option>Steinschlag</option><option>Felge</option><option>Sonstiges</option></select></div>
+      <div class="field"><label>Schweregrad</label><select id="dSeverity"><option>Leicht</option><option>Mittel</option><option>Stark</option></select></div>
+      <div class="field" style="grid-column:1/-1"><label>Beschreibung</label><textarea id="dDesc" rows="3" placeholder="Beschreibung des Schadens ..."></textarea></div>
+    </div>
+    <div class="btnrow"><button class="btn primary" onclick="saveDamage()">Schaden speichern</button><button class="btn" onclick="closeModal()">Abbrechen</button></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://nskguwvyysavbyjwkmez.supabase.co';
+const SUPABASE_KEY='sb_publishable_o_LiCB2j8r1KWCunkBiggQ_7Co6LBr9';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let user=null;
+const areas=['Front','Front links','Front rechts','Seite links','Seite rechts','Heck','Heck links','Heck rechts','Innenraum'];
+const wheels=['Vorne links','Vorne rechts','Hinten links','Hinten rechts'];
+let state={vehicle:{},handover:{},return:{},photos:{},damages:[],wheels:{}};
+let dirty=false;
+let cloudTimer=null;
+
+function key(){return 'autocheck_pro_'+(user?.id||'guest')}
+function load(){
+  try{state=Object.assign({vehicle:{},handover:{},return:{},photos:{},damages:[],wheels:{}},JSON.parse(localStorage.getItem(key())||'{}'));}catch(e){}
+}
+function persistLocal(){localStorage.setItem(key(),JSON.stringify(state)); dirty=true; renderAll()}
+function persist(){persistLocal()}
+function markClean(){dirty=false; updateSaveButton()}
+function updateSaveButton(){
+  const b=document.getElementById('saveAllBtn');
+  if(b){b.textContent=dirty?'☁ Änderungen speichern':'✓ Gespeichert'; b.classList.toggle('primary',dirty)}
+}
+async function saveAll(){
+  localStorage.setItem(key(),JSON.stringify(state));
+  dirty=false; updateSaveButton(); renderAll(); toast('Änderungen gespeichert');
+  // Cloud sync uses the authenticated user's private local snapshot endpoint
+  // when available; otherwise the local device remains the source of truth.
+  try{
+    const payload={user_id:user.id,snapshot:state,updated_at:new Date().toISOString()};
+    const {error}=await sb.from('autocheck_snapshots').upsert(payload,{onConflict:'user_id'});
+    if(error) throw error;
+    toast('Gespeichert & synchronisiert');
+  }catch(e){
+    console.warn('Cloud-Sync:',e.message);
+    toast('Lokal gespeichert · Cloud-Tabelle noch nicht eingerichtet');
+  }
+}
+async function syncNow(){
+  try{
+    const {data,error}=await sb.from('autocheck_snapshots').select('snapshot,updated_at').eq('user_id',user.id).maybeSingle();
+    if(error) throw error;
+    if(data?.snapshot){
+      state=Object.assign({vehicle:{},handover:{},return:{},photos:{},damages:[],wheels:{}},data.snapshot);
+      localStorage.setItem(key(),JSON.stringify(state)); dirty=false; renderAll(); updateSaveButton(); toast('Cloud-Daten geladen');
+    }else toast('Noch kein Cloud-Stand vorhanden');
+  }catch(e){toast('Cloud-Sync noch nicht eingerichtet')}
+}
+function toast(t){const x=document.getElementById('toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2200)}
+function nowLocal(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+
+const I18N={
+de:{brand:'AutoCheck',brandSub:'Fahrzeugprüfung & Dokumentation',currentCheck:'Aktuelle Prüfung',heroEmpty:'Lege zuerst ein Fahrzeug an und starte anschließend die Übergabe.',edit:'Bearbeiten',overview:'Übersicht',vehicle:'Fahrzeug',handover:'Übergabe',return:'Rückgabe',damage:'Schäden',report:'Protokoll',quickStart:'Schnellstart',handoverDesc:'Fotos und Zustand vor der Fahrt',damageDesc:'Karosserie und jede Felge einzeln',reportDesc:'Prüfung ansehen und drucken',vehicleData:'Fahrzeugdaten',damageTitle:'Schäden & Auffälligkeiten',wheelsTitle:'Felgen einzeln',inspectionReport:'Prüfprotokoll'},
+en:{brand:'AutoCheck',brandSub:'Vehicle inspection & documentation',currentCheck:'Current inspection',heroEmpty:'Add a vehicle first and then start the handover.',edit:'Edit',overview:'Overview',vehicle:'Vehicle',handover:'Handover',return:'Return',damage:'Damage',report:'Report',quickStart:'Quick start',handoverDesc:'Photos and condition before the drive',damageDesc:'Bodywork and each wheel separately',reportDesc:'View and print inspection',vehicleData:'Vehicle data',damageTitle:'Damage & findings',wheelsTitle:'Wheels separately',inspectionReport:'Inspection report'},
+fr:{brand:'AutoCheck',brandSub:'Inspection et documentation du véhicule',currentCheck:'Inspection actuelle',heroEmpty:'Ajoutez d’abord un véhicule puis commencez la remise.',edit:'Modifier',overview:'Aperçu',vehicle:'Véhicule',handover:'Remise',return:'Retour',damage:'Dommages',report:'Rapport',quickStart:'Démarrage rapide',handoverDesc:'Photos et état avant le trajet',damageDesc:'Carrosserie et chaque roue séparément',reportDesc:'Voir et imprimer le contrôle',vehicleData:'Données du véhicule',damageTitle:'Dommages et anomalies',wheelsTitle:'Roues séparément',inspectionReport:'Rapport de contrôle'},
+es:{brand:'AutoCheck',brandSub:'Inspección y documentación del vehículo',currentCheck:'Inspección actual',heroEmpty:'Añade primero un vehículo y después inicia la entrega.',edit:'Editar',overview:'Resumen',vehicle:'Vehículo',handover:'Entrega',return:'Devolución',damage:'Daños',report:'Informe',quickStart:'Inicio rápido',handoverDesc:'Fotos y estado antes del viaje',damageDesc:'Carrocería y cada rueda por separado',reportDesc:'Ver e imprimir inspección',vehicleData:'Datos del vehículo',damageTitle:'Daños y anomalías',wheelsTitle:'Ruedas por separado',inspectionReport:'Informe de inspección'},
+it:{brand:'AutoCheck',brandSub:'Controllo e documentazione del veicolo',currentCheck:'Controllo attuale',heroEmpty:'Aggiungi prima un veicolo e poi avvia la consegna.',edit:'Modifica',overview:'Panoramica',vehicle:'Veicolo',handover:'Consegna',return:'Riconsegna',damage:'Danni',report:'Rapporto',quickStart:'Avvio rapido',handoverDesc:'Foto e condizioni prima del viaggio',damageDesc:'Carrozzeria e ogni ruota separatamente',reportDesc:'Visualizza e stampa il controllo',vehicleData:'Dati del veicolo',damageTitle:'Danni e anomalie',wheelsTitle:'Ruote separatamente',inspectionReport:'Rapporto di controllo'},
+nl:{brand:'AutoCheck',brandSub:'Voertuigcontrole & documentatie',currentCheck:'Huidige controle',heroEmpty:'Voeg eerst een voertuig toe en start daarna de overdracht.',edit:'Bewerken',overview:'Overzicht',vehicle:'Voertuig',handover:'Overdracht',return:'Retour',damage:'Schade',report:'Rapport',quickStart:'Snel starten',handoverDesc:'Foto’s en toestand vóór de rit',damageDesc:'Carrosserie en elk wiel afzonderlijk',reportDesc:'Controle bekijken en afdrukken',vehicleData:'Voertuiggegevens',damageTitle:'Schade & bijzonderheden',wheelsTitle:'Wielen afzonderlijk',inspectionReport:'Controlerapport'},
+pl:{brand:'AutoCheck',brandSub:'Kontrola i dokumentacja pojazdu',currentCheck:'Bieżąca kontrola',heroEmpty:'Najpierw dodaj pojazd, a następnie rozpocznij przekazanie.',edit:'Edytuj',overview:'Przegląd',vehicle:'Pojazd',handover:'Przekazanie',return:'Zwrot',damage:'Uszkodzenia',report:'Raport',quickStart:'Szybki start',handoverDesc:'Zdjęcia i stan przed jazdą',damageDesc:'Nadwozie i każde koło osobno',reportDesc:'Wyświetl i wydrukuj kontrolę',vehicleData:'Dane pojazdu',damageTitle:'Uszkodzenia i uwagi',wheelsTitle:'Koła osobno',inspectionReport:'Raport kontroli'},
+pt:{brand:'AutoCheck',brandSub:'Inspeção e documentação do veículo',currentCheck:'Inspeção atual',heroEmpty:'Adicione primeiro um veículo e depois inicie a entrega.',edit:'Editar',overview:'Visão geral',vehicle:'Veículo',handover:'Entrega',return:'Devolução',damage:'Danos',report:'Relatório',quickStart:'Início rápido',handoverDesc:'Fotos e estado antes da viagem',damageDesc:'Carroçaria e cada roda separadamente',reportDesc:'Ver e imprimir inspeção',vehicleData:'Dados do veículo',damageTitle:'Danos e ocorrências',wheelsTitle:'Rodas separadamente',inspectionReport:'Relatório de inspeção'},
+tr:{brand:'AutoCheck',brandSub:'Araç kontrolü ve dokümantasyon',currentCheck:'Mevcut kontrol',heroEmpty:'Önce bir araç ekleyin ve ardından teslimatı başlatın.',edit:'Düzenle',overview:'Genel Bakış',vehicle:'Araç',handover:'Teslim',return:'İade',damage:'Hasarlar',report:'Rapor',quickStart:'Hızlı Başlangıç',handoverDesc:'Sürüş öncesi fotoğraflar ve durum',damageDesc:'Kaporta ve her jant ayrı',reportDesc:'Kontrolü görüntüle ve yazdır',vehicleData:'Araç bilgileri',damageTitle:'Hasarlar ve bulgular',wheelsTitle:'Jantlar ayrı',inspectionReport:'Kontrol raporu'},
+ar:{brand:'AutoCheck',brandSub:'فحص المركبة وتوثيقها',currentCheck:'الفحص الحالي',heroEmpty:'أضف مركبة أولاً ثم ابدأ التسليم.',edit:'تعديل',overview:'نظرة عامة',vehicle:'المركبة',handover:'التسليم',return:'الإرجاع',damage:'الأضرار',report:'التقرير',quickStart:'بدء سريع',handoverDesc:'الصور والحالة قبل الرحلة',damageDesc:'الهيكل وكل عجلة بشكل منفصل',reportDesc:'عرض وطباعة الفحص',vehicleData:'بيانات المركبة',damageTitle:'الأضرار والملاحظات',wheelsTitle:'العجلات بشكل منفصل',inspectionReport:'تقرير الفحص'},
+ru:{brand:'AutoCheck',brandSub:'Осмотр и документация автомобиля',currentCheck:'Текущий осмотр',heroEmpty:'Сначала добавьте автомобиль, затем начните передачу.',edit:'Изменить',overview:'Обзор',vehicle:'Автомобиль',handover:'Передача',return:'Возврат',damage:'Повреждения',report:'Отчёт',quickStart:'Быстрый старт',handoverDesc:'Фото и состояние до поездки',damageDesc:'Кузов и каждое колесо отдельно',reportDesc:'Просмотр и печать осмотра',vehicleData:'Данные автомобиля',damageTitle:'Повреждения и замечания',wheelsTitle:'Колёса отдельно',inspectionReport:'Отчёт осмотра'},
+uk:{brand:'AutoCheck',brandSub:'Огляд і документація автомобіля',currentCheck:'Поточний огляд',heroEmpty:'Спочатку додайте автомобіль, а потім почніть передачу.',edit:'Редагувати',overview:'Огляд',vehicle:'Автомобіль',handover:'Передача',return:'Повернення',damage:'Пошкодження',report:'Звіт',quickStart:'Швидкий старт',handoverDesc:'Фото та стан перед поїздкою',damageDesc:'Кузов і кожне колесо окремо',reportDesc:'Перегляд і друк огляду',vehicleData:'Дані автомобіля',damageTitle:'Пошкодження та зауваження',wheelsTitle:'Колеса окремо',inspectionReport:'Звіт огляду'},
+ro:{brand:'AutoCheck',brandSub:'Inspecție și documentare auto',currentCheck:'Inspecția curentă',heroEmpty:'Adaugă mai întâi un vehicul, apoi începe predarea.',edit:'Editează',overview:'Prezentare',vehicle:'Vehicul',handover:'Predare',return:'Returnare',damage:'Daune',report:'Raport',quickStart:'Pornire rapidă',handoverDesc:'Fotografii și stare înainte de drum',damageDesc:'Caroserie și fiecare roată separat',reportDesc:'Vezi și imprimă inspecția',vehicleData:'Date vehicul',damageTitle:'Daune și constatări',wheelsTitle:'Roți separat',inspectionReport:'Raport de inspecție'},
+cs:{brand:'AutoCheck',brandSub:'Kontrola a dokumentace vozidla',currentCheck:'Aktuální kontrola',heroEmpty:'Nejprve přidejte vozidlo a poté spusťte předání.',edit:'Upravit',overview:'Přehled',vehicle:'Vozidlo',handover:'Předání',return:'Vrácení',damage:'Poškození',report:'Protokol',quickStart:'Rychlý start',handoverDesc:'Fotografie a stav před jízdou',damageDesc:'Karoserie a každé kolo zvlášť',reportDesc:'Zobrazit a vytisknout kontrolu',vehicleData:'Údaje vozidla',damageTitle:'Poškození a nálezy',wheelsTitle:'Kola samostatně',inspectionReport:'Kontrolní protokol'},
+sk:{brand:'AutoCheck',brandSub:'Kontrola a dokumentácia vozidla',currentCheck:'Aktuálna kontrola',heroEmpty:'Najprv pridajte vozidlo a potom začnite odovzdanie.',edit:'Upraviť',overview:'Prehľad',vehicle:'Vozidlo',handover:'Odovzdanie',return:'Vrátenie',damage:'Poškodenia',report:'Protokol',quickStart:'Rýchly štart',handoverDesc:'Fotografie a stav pred jazdou',damageDesc:'Karoséria a každé koleso zvlášť',reportDesc:'Zobraziť a vytlačiť kontrolu',vehicleData:'Údaje vozidla',damageTitle:'Poškodenia a nálezy',wheelsTitle:'Kolesá samostatne',inspectionReport:'Kontrolný protokol'},
+hu:{brand:'AutoCheck',brandSub:'Járműellenőrzés és dokumentáció',currentCheck:'Aktuális ellenőrzés',heroEmpty:'Először adjon hozzá járművet, majd indítsa el az átadást.',edit:'Szerkesztés',overview:'Áttekintés',vehicle:'Jármű',handover:'Átadás',return:'Visszavétel',damage:'Sérülések',report:'Jegyzőkönyv',quickStart:'Gyorsindítás',handoverDesc:'Fotók és állapot indulás előtt',damageDesc:'Karosszéria és minden kerék külön',reportDesc:'Ellenőrzés megtekintése és nyomtatása',vehicleData:'Járműadatok',damageTitle:'Sérülések és megjegyzések',wheelsTitle:'Kerekek külön',inspectionReport:'Ellenőrzési jegyzőkönyv'},
+el:{brand:'AutoCheck',brandSub:'Έλεγχος και τεκμηρίωση οχήματος',currentCheck:'Τρέχων έλεγχος',heroEmpty:'Προσθέστε πρώτα όχημα και μετά ξεκινήστε την παράδοση.',edit:'Επεξεργασία',overview:'Επισκόπηση',vehicle:'Όχημα',handover:'Παράδοση',return:'Επιστροφή',damage:'Ζημιές',report:'Αναφορά',quickStart:'Γρήγορη εκκίνηση',handoverDesc:'Φωτογραφίες και κατάσταση πριν τη διαδρομή',damageDesc:'Αμάξωμα και κάθε τροχός ξεχωριστά',reportDesc:'Προβολή και εκτύπωση ελέγχου',vehicleData:'Στοιχεία οχήματος',damageTitle:'Ζημιές και ευρήματα',wheelsTitle:'Τροχοί ξεχωριστά',inspectionReport:'Αναφορά ελέγχου'},
+sv:{brand:'AutoCheck',brandSub:'Fordonskontroll och dokumentation',currentCheck:'Aktuell kontroll',heroEmpty:'Lägg först till ett fordon och starta sedan överlämningen.',edit:'Redigera',overview:'Översikt',vehicle:'Fordon',handover:'Överlämning',return:'Återlämning',damage:'Skador',report:'Rapport',quickStart:'Snabbstart',handoverDesc:'Foton och skick före körning',damageDesc:'Kaross och varje hjul separat',reportDesc:'Visa och skriv ut kontroll',vehicleData:'Fordonsuppgifter',damageTitle:'Skador och anmärkningar',wheelsTitle:'Hjul separat',inspectionReport:'Kontrollrapport'},
+da:{brand:'AutoCheck',brandSub:'Køretøjskontrol og dokumentation',currentCheck:'Aktuel kontrol',heroEmpty:'Tilføj først et køretøj og start derefter overdragelsen.',edit:'Rediger',overview:'Oversigt',vehicle:'Køretøj',handover:'Overdragelse',return:'Returnering',damage:'Skader',report:'Rapport',quickStart:'Hurtig start',handoverDesc:'Fotos og stand før kørslen',damageDesc:'Karrosseri og hvert hjul separat',reportDesc:'Se og udskriv kontrol',vehicleData:'Køretøjsdata',damageTitle:'Skader og observationer',wheelsTitle:'Hjul separat',inspectionReport:'Kontrolrapport'},
+no:{brand:'AutoCheck',brandSub:'Kjøretøykontroll og dokumentasjon',currentCheck:'Gjeldende kontroll',heroEmpty:'Legg til et kjøretøy først og start deretter overleveringen.',edit:'Rediger',overview:'Oversikt',vehicle:'Kjøretøy',handover:'Overlevering',return:'Retur',damage:'Skader',report:'Rapport',quickStart:'Hurtigstart',handoverDesc:'Bilder og tilstand før kjøring',damageDesc:'Karosseri og hvert hjul separat',reportDesc:'Vis og skriv ut kontroll',vehicleData:'Kjøretøydata',damageTitle:'Skader og funn',wheelsTitle:'Hjul separat',inspectionReport:'Kontrollrapport'},
+fi:{brand:'AutoCheck',brandSub:'Ajoneuvon tarkastus ja dokumentointi',currentCheck:'Nykyinen tarkastus',heroEmpty:'Lisää ensin ajoneuvo ja aloita sitten luovutus.',edit:'Muokkaa',overview:'Yleiskatsaus',vehicle:'Ajoneuvo',handover:'Luovutus',return:'Palautus',damage:'Vauriot',report:'Raportti',quickStart:'Pikakäynnistys',handoverDesc:'Kuvat ja kunto ennen ajoa',damageDesc:'Kori ja jokainen pyörä erikseen',reportDesc:'Näytä ja tulosta tarkastus',vehicleData:'Ajoneuvon tiedot',damageTitle:'Vauriot ja havainnot',wheelsTitle:'Pyörät erikseen',inspectionReport:'Tarkastusraportti'}
+};
+const LANG_META={de:['🇩🇪','Deutsch'],en:['🇬🇧','English'],fr:['🇫🇷','Français'],es:['🇪🇸','Español'],it:['🇮🇹','Italiano'],nl:['🇳🇱','Nederlands'],pl:['🇵🇱','Polski'],pt:['🇵🇹','Português'],tr:['🇹🇷','Türkçe'],ar:['🇸🇦','العربية'],ru:['🇷🇺','Русский'],uk:['🇺🇦','Українська'],ro:['🇷🇴','Română'],cs:['🇨🇿','Čeština'],sk:['🇸🇰','Slovenčina'],hu:['🇭🇺','Magyar'],el:['🇬🇷','Ελληνικά'],sv:['🇸🇪','Svenska'],da:['🇩🇰','Dansk'],no:['🇳🇴','Norsk'],fi:['🇫🇮','Suomi']};
+const RTL_LANGS=new Set(['ar']);
+function renderLanguageOptions(filter=''){
+ const box=document.getElementById('languageOptions');if(!box)return;const q=filter.toLowerCase().trim();
+ box.innerHTML=Object.entries(LANG_META).filter(([c,m])=>!q||c.includes(q)||m[1].toLowerCase().includes(q)).map(([c,m])=>`<button class="language-option ${localStorage.getItem('autocheck_lang')===c?'selected':''}" onclick="setLanguage('${c}')"><span class="flag">${m[0]}</span><span><b>${m[1]}</b><small>${c.toUpperCase()}</small></span></button>`).join('');
+}
+function toggleLanguageMenu(){const m=document.getElementById('languageMenu');if(!m)return;m.classList.toggle('show');if(m.classList.contains('show')){renderLanguageOptions();setTimeout(()=>document.getElementById('languageSearch')?.focus(),50)}}
+function filterLanguages(v){renderLanguageOptions(v)}
+function setLanguage(lang){
+ const dict=I18N[lang]||I18N.de;localStorage.setItem('autocheck_lang',lang);
+ document.documentElement.lang=lang;document.documentElement.dir=RTL_LANGS.has(lang)?'rtl':'ltr';
+ document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(dict[k])el.textContent=dict[k]});
+ const meta=LANG_META[lang]||LANG_META.de;document.getElementById('langFlag').textContent=meta[0];document.getElementById('langShort').textContent=lang.toUpperCase();
+ renderLanguageOptions(document.getElementById('languageSearch')?.value||'');document.getElementById('languageMenu')?.classList.remove('show');
+ updateDynamicLanguage(lang);
+}
+function updateDynamicLanguage(lang){const d=I18N[lang]||I18N.de;const v=state?.vehicle||{};const hs=document.getElementById('heroSub');if(hs)hs.textContent=v.model?d.currentCheck:d.heroEmpty;document.title='AutoCheck — '+d.brandSub}
+function initLanguage(){const saved=localStorage.getItem('autocheck_lang')||((navigator.language||'de').slice(0,2));setLanguage(I18N[saved]?saved:'de')}
+document.addEventListener('click',e=>{const m=document.getElementById('languageMenu'),t=document.querySelector('.language-trigger');if(m?.classList.contains('show')&&!m.contains(e.target)&&!t?.contains(e.target))m.classList.remove('show')});
+
+async function login(){
+ const e=email.value.trim(),p=password.value;
+ if(!e||!p)return toast('E-Mail und Passwort eingeben');
+ const {error}=await sb.auth.signInWithPassword({email:e,password:p});
+ if(error)return toast(error.message);
+}
+async function signup(){
+ const e=email.value.trim(),p=password.value;
+ if(!e||!p)return toast('E-Mail und Passwort eingeben');
+ if(p.length<6)return toast('Passwort muss mindestens 6 Zeichen haben');
+ const {error}=await sb.auth.signUp({email:e,password:p});
+ if(error)return toast(error.message);
+ toast('Konto erstellt. Du kannst dich jetzt anmelden.');
+}
+async function logout(){await sb.auth.signOut()}
+sb.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;document.getElementById('loginOverlay').style.display=user?'none':'grid';document.getElementById('app').style.display=user?'block':'none';if(user){load();init();}})
+
+function init(){
+ initLanguage();
+ if(!state.handover.date)state.handover.date=nowLocal();
+ if(!state.return.date)state.return.date=nowLocal();
+ fillVehicle();fillForms();renderAll();
+}
+function fillVehicle(){for(const [id,k] of [['vModel','model'],['vPlate','plate'],['vYear','year'],['vColor','color'],['vKm','km'],['vVin','vin'],['vDriver','driver'],['vInspector','inspector']])document.getElementById(id).value=state.vehicle[k]||''}
+function fillForms(){hKm.value=state.handover.km||state.vehicle.km||'';hDate.value=state.handover.date||nowLocal();hNote.value=state.handover.note||'';rKm.value=state.return.km||'';rDate.value=state.return.date||nowLocal();rNote.value=state.return.note||''}
+function saveVehicle(){
+ state.vehicle={model:vModel.value,plate:vPlate.value,year:vYear.value,color:vColor.value,km:vKm.value,vin:vVin.value,driver:vDriver.value,inspector:vInspector.value};persist();toast('Fahrzeug gespeichert');showPage('home')
+}
+function resetVehicle(){if(confirm('Alle AutoCheck-Daten dieses Kontos auf diesem Gerät löschen?')){localStorage.removeItem(key());location.reload()}}
+function saveSection(which){
+ if(which==='handover')state.handover={km:hKm.value,date:hDate.value,note:hNote.value};
+ else state.return={km:rKm.value,date:rDate.value,note:rNote.value};
+ persist();toast(which==='handover'?'Übergabe gespeichert':'Rückgabe gespeichert')
+}
+
+function photoCard(area,type){
+ const base=type+'_'+area.replace(/[^a-z0-9]+/gi,'_');
+ const raw=state.photos[base];const arr=Array.isArray(raw)?raw:(raw?[raw]:[]);
+ const slots=[0,1,2,3];
+ return `<div class="photo-card">
+   <div class="photo-head"><b>${area}</b><span>${type==='before'?'Übergabe · Vorher':'Rückgabe · Nachher'}</span></div>
+   <div class="multi-photos">
+   ${slots.map(i=>`<div class="photo-box ${arr[i]?'filled':''}">
+      ${arr[i]?`<img src="${arr[i]}"><button class="photo-delete" onclick="deletePhoto('${base}',${i})">×</button>`:'<div class="ph">Foto ${i+1}<br>noch leer</div>'}
+      <div class="photo-actions"><label class="camera">📷<input type="file" accept="image/*" capture="environment" onchange="savePhoto('${base}',${i},this)"></label><label class="gallery">▣<input type="file" accept="image/*" onchange="savePhoto('${base}',${i},this)"></label></div>
+   </div>`).join('')}
+   </div>
+   <div class="photo-footer">${arr.length||0} / 4 Fotos · mehrere Fotos pro Bereich möglich</div>
+ </div>`
+}
+function savePhoto(id,index,input){
+ const file=input.files?.[0];if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+   if(!Array.isArray(state.photos[id])) state.photos[id]=[];
+   while(state.photos[id].length<=index)state.photos[id].push(null);
+   state.photos[id][index]=reader.result;
+   persistLocal(); toast('Foto hinzugefügt · jetzt speichern');
+ };
+ reader.readAsDataURL(file)
+}
+function deletePhoto(id,index){
+ if(!Array.isArray(state.photos[id]))return;
+ state.photos[id].splice(index,1);
+ if(!state.photos[id].length) delete state.photos[id];
+ persistLocal(); toast('Foto entfernt · jetzt speichern');
+}
+function addDamage(area){
+ document.getElementById('damageModal').classList.add('show');dArea.value=area||'';dDesc.value='';dStatus.value='Neuer Schaden';dType.value='Kratzer';dSeverity.value='Leicht'
+}
+function closeModal(){document.getElementById('damageModal').classList.remove('show')}
+function saveDamage(){
+ state.damages.push({id:Date.now(),area:dArea.value||'Nicht angegeben',status:dStatus.value,type:dType.value,severity:dSeverity.value,desc:dDesc.value,date:new Date().toLocaleString('de-DE')});
+ persist();closeModal();toast('Schaden dokumentiert')
+}
+function editDamage(i){const d=state.damages[i];addDamage(d.area);dStatus.value=d.status;dType.value=d.type;dSeverity.value=d.severity;dDesc.value=d.desc||'';document.querySelector('#damageModal .btn.primary').onclick=()=>{state.damages[i]={...d,area:dArea.value||d.area,status:dStatus.value,type:dType.value,severity:dSeverity.value,desc:dDesc.value};persistLocal();closeModal();toast('Schaden geändert · jetzt speichern');document.querySelector('#damageModal .btn.primary').onclick=saveDamage}}
+function removeDamage(i){state.damages.splice(i,1);persistLocal();toast('Schaden gelöscht · jetzt speichern')}
+function clearDamages(){if(confirm('Alle Schadeneinträge löschen?')){state.damages=[];persist();toast('Schäden gelöscht')}}
+function renderDamages(){
+ const newCount=state.damages.filter(d=>d.status==='Neuer Schaden').length;
+ const oldCount=state.damages.filter(d=>d.status==='Bereits vorhanden').length;
+ const wheelCount=state.damages.filter(d=>String(d.area).startsWith('wheel_')||String(d.type).includes('Felgenfoto')).length;
+ damageList.innerHTML=(state.damages.length?`<div class="damage-summary"><div><b>${newCount}</b><span>Neu</span></div><div><b>${oldCount}</b><span>Vorhanden</span></div><div><b>${wheelCount}</b><span>Felgen</span></div></div>`:'')+
+ (state.damages.length?state.damages.map((d,i)=>`<div class="damage-item"><header><div><b>${esc(d.area)}</b><small>${esc(d.date)}</small></div><span class="tag ${d.status==='Neuer Schaden'?'red':d.status==='Bereits vorhanden'?'warn':''}">${esc(d.status)}</span></header><p><strong>${esc(d.type)}</strong> · ${esc(d.severity)}<br>${esc(d.desc)||'Keine Beschreibung'}</p><div class="damage-actions"><button onclick="editDamage(${i})">Bearbeiten</button><button onclick="removeDamage(${i})">Löschen</button></div></div>`).join(''):'<div class="empty">Noch keine Schäden dokumentiert.<br>Tippe auf einen Bereich der Fahrzeugkarte oder „Schaden hinzufügen“.</div>');
+ document.querySelectorAll('.zone').forEach(z=>{const n=z.dataset.zone;z.classList.toggle('selected',state.damages.some(d=>d.area===n))})
+}
+function renderWheels(){
+ wheelGrid.innerHTML=wheels.map((w,i)=>{const id='wheel_'+i,val=state.wheels[id];return `<div class="wheel"><b>⚙️ ${w}</b><div class="mini">${val?`<img src="${val}">`:'Eigenes Felgenfoto'}<div class="photo-actions"><label class="camera">📷<input type="file" accept="image/*" capture="environment" onchange="saveWheel('${id}',this)"></label><label class="gallery">▣<input type="file" accept="image/*" onchange="saveWheel('${id}',this)"></label></div></div></div>`}).join('')
+}
+function saveWheel(id,input){const f=input.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{state.wheels[id]=r.result;state.damages.push({id:Date.now(),area:id.replace('wheel_','Felge '),status:'Dokumentiert',type:'Felgenfoto',severity:'—',desc:'Eigenständige Felgen-Dokumentation',date:new Date().toLocaleString('de-DE')});persist();toast('Felgenfoto gespeichert')};r.readAsDataURL(f)}
+
+function renderCompare(){
+ const el=document.getElementById('comparePanel');if(!el)return;
+ el.innerHTML=areas.map(area=>{const b=state.photos['before_'+area.replace(/[^a-z0-9]+/gi,'_')],a=state.photos['after_'+area.replace(/[^a-z0-9]+/gi,'_')];const bp=Array.isArray(b)?b[0]:b,ap=Array.isArray(a)?a[0]:a;return `<div class="compare-row"><div><b>${area}</b><span>Übergabe</span>${bp?`<img src="${bp}">`:'<em>Kein Foto</em>'}</div><div><b>${area}</b><span>Rückgabe</span>${ap?`<img src="${ap}">`:'<em>Kein Foto</em>'}</div></div>`}).join('');
+}
+
+function renderReport(){
+ const v=state.vehicle||{},before=Object.entries(state.photos).filter(([k])=>k.startsWith('before_')).reduce((n,[,a])=>n+(Array.isArray(a)?a.length:0),0),after=Object.entries(state.photos).filter(([k])=>k.startsWith('after_')).reduce((n,[k,a])=>n+(Array.isArray(a)?a.length:0),0);
+ reportContent.innerHTML=`<div class="grid">
+ <div class="card stat"><small>Fahrzeug</small><b style="font-size:19px">${esc(v.model)||'—'}</b><small>${esc(v.plate)||'—'} · ${esc(v.color)||'—'}</small></div>
+ <div class="card stat"><small>Übergabe</small><b style="font-size:19px">${esc(state.handover.km)||'—'} km</b><small>${esc(state.handover.date)||'—'}</small></div>
+ <div class="card stat"><small>Rückgabe</small><b style="font-size:19px">${esc(state.return.km)||'—'} km</b><small>${esc(state.return.date)||'—'}</small></div></div>
+ <div class="section-title"><h3>Dokumentationsstatus</h3><span>${state.damages.length} Einträge</span></div>
+ <div class="timeline">
+ <div class="event"><time>FAHRZEUG</time><div class="eventbox"><b>${esc(v.model)||'Nicht angelegt'}</b><span>${esc(v.vin)||'Keine FIN'} · ${esc(v.driver)||'Kein Fahrer'}</span></div></div>
+ <div class="event"><time>ÜBERGABE</time><div class="eventbox"><b>${before} / 9 Fotos</b><span>${esc(state.handover.note)||'Keine zusätzlichen Hinweise'}</span></div></div>
+ <div class="event"><time>RÜCKGABE</time><div class="eventbox"><b>${after} / 9 Fotos</b><span>${esc(state.return.note)||'Keine zusätzlichen Hinweise'}</span></div></div>
+ <div class="event"><time>SCHÄDEN</time><div class="eventbox"><b>${state.damages.length} dokumentierte Einträge</b><span>Karosserie und separate Felgen-Dokumentation</span></div></div></div>`
+}
+function renderAll(){
+ fillVehicle();fillForms();renderPhotos();renderDamages();renderWheels();renderCompare();renderReport();
+ const v=state.vehicle||{}, before=Object.keys(state.photos).filter(k=>k.startsWith('before_')).length, after=Object.keys(state.photos).filter(k=>k.startsWith('after_')).length;
+ const photos=Object.values(state.photos).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0), damage=state.damages.length, checks=(v.model?1:0)+Math.min(before,9)/9+Math.min(after,9)/9+(damage>=0?0:0);
+ const pct=Math.round(Math.min(1,(checks/3))*100);
+ heroTitle.textContent=v.model||'Kein Fahrzeug angelegt';heroPlate.textContent=v.plate||'—';heroMeta.textContent=[v.year,v.color,v.km?v.km+' km':null].filter(Boolean).join(' · ')||'Fahrzeugdaten fehlen';
+ progress.textContent=pct+'%';ring.style.setProperty('--p',pct+'%');progressText.textContent=pct?'Prüfung in Bearbeitung':'Noch keine Prüfung gestartet';
+ sVehicle.textContent=v.model?'1':'0';sPhotos.textContent=photos+' / 72';sDamage.textContent=damage;updateSaveButton();document.getElementById('saveStatus').textContent=dirty?'Ungespeicherte Änderungen':'Alles gespeichert';
+}
+function showPage(id){
+ document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));
+ document.querySelectorAll('.navbtn,.bottom button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+ if(id==='handover')saveSection('handover'); if(id==='return')saveSection('return');
+ window.scrollTo({top:0,behavior:'smooth'})
+}
+document.querySelectorAll('.navbtn,.bottom button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+[hKm,hDate,hNote].forEach(x=>x.addEventListener('change',()=>saveSection('handover')));
+[rKm,rDate,rNote].forEach(x=>x.addEventListener('change',()=>saveSection('return')));
+
+function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='autocheck-backup.json';a.click();URL.revokeObjectURL(a.href);toast('Backup exportiert')}
+</script>
+
+<style>
+@media print{
+ body{background:white;color:#111}.app{max-width:none;padding:0}.topbar,.tabs,.bottom,.hero,.btn,.iconbtn{display:none!important}.page{display:none!important}.page#report{display:block!important}.card,.panel,.stat,.eventbox{background:white!important;color:#111;box-shadow:none;border:1px solid #ddd}.sub,.eventbox span,.section-title span{color:#555!important}
+}
+</style>
+</body>
+</html>
