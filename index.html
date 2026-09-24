@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AutoCheck — Fahrzeugprüfung</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#07101c;--bg2:#0c1726;--card:rgba(17,29,46,.82);--card2:#132239;
+  --line:rgba(255,255,255,.09);--text:#f5f8fc;--muted:#91a0b5;
+  --accent:#6c7cff;--accent2:#45d3b0;--danger:#ff6378;--warn:#ffbd5c;
+  --shadow:0 18px 55px rgba(0,0,0,.28);--r:22px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;background:
+radial-gradient(900px 500px at 90% -10%,rgba(108,124,255,.23),transparent 60%),
+radial-gradient(700px 450px at -10% 20%,rgba(69,211,176,.12),transparent 58%),var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{border:0;color:inherit}
+.app{max-width:1180px;margin:auto;padding:20px 18px 110px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 0 22px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#7785ff,#43d8b2);box-shadow:0 12px 30px rgba(108,124,255,.25);font-weight:900}
+.brand h1{font-size:18px;margin:0}.brand small{display:block;color:var(--muted);margin-top:2px}
+.top-actions{display:flex;gap:8px}.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;cursor:pointer}
+.iconbtn:hover,.navbtn:hover{background:var(--card2)}
+.hero{display:grid;grid-template-columns:1.35fr .65fr;gap:16px;margin-bottom:16px}
+.card{background:linear-gradient(180deg,rgba(20,34,54,.88),rgba(13,24,39,.88));border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);backdrop-filter:blur(18px)}
+.hero-main{padding:25px}
+.kicker{font-size:12px;color:#9eabff;text-transform:uppercase;letter-spacing:.13em;font-weight:800}
+.hero h2{font-size:32px;line-height:1.05;margin:8px 0 10px}.hero p{color:var(--muted);margin:0;line-height:1.5}
+.vehicle-pill{margin-top:20px;padding:15px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.035);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.plate{font-weight:900;letter-spacing:.08em;font-size:18px}.sub{color:var(--muted);font-size:13px}
+.progress-card{padding:22px;display:flex;flex-direction:column;justify-content:space-between}
+.progress-ring{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;margin:auto;background:conic-gradient(var(--accent) var(--p,0%),rgba(255,255,255,.08) 0);position:relative}
+.progress-ring:after{content:"";position:absolute;inset:9px;border-radius:50%;background:#0d1a2b}.progress-ring b{position:relative;z-index:1;font-size:25px}
+.progress-card .sub{text-align:center;margin-top:10px}
+.section-title{display:flex;align-items:end;justify-content:space-between;margin:28px 0 12px}.section-title h3{margin:0;font-size:21px}.section-title span{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.stat{padding:18px;min-height:132px}.stat .emoji{font-size:24px}.stat b{display:block;font-size:27px;margin:12px 0 3px}.stat small{color:var(--muted)}
+.tabs{display:flex;gap:7px;overflow:auto;padding:6px;margin:10px 0 18px;position:sticky;top:0;z-index:5;background:rgba(7,16,28,.78);backdrop-filter:blur(18px);border-radius:18px}
+.navbtn{white-space:nowrap;padding:11px 15px;border-radius:13px;background:transparent;color:var(--muted);cursor:pointer;font-weight:700}.navbtn.active{background:rgba(108,124,255,.18);color:#dce0ff;border:1px solid rgba(108,124,255,.3)}
+.page{display:none}.page.active{display:block}
+.panel{padding:20px}.panel h3{margin:0 0 6px}.panel p{color:var(--muted);margin:0 0 18px}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.field label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px}.field input,.field select,.field textarea{width:100%;background:#0b1727;border:1px solid var(--line);color:var(--text);border-radius:13px;padding:13px 14px;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(108,124,255,.65);box-shadow:0 0 0 3px rgba(108,124,255,.1)}
+.btnrow{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}.btn{padding:12px 16px;border-radius:13px;background:#17273d;border:1px solid var(--line);cursor:pointer;font-weight:800}.btn.primary{background:linear-gradient(135deg,#6977ff,#5967e8);box-shadow:0 10px 25px rgba(89,103,232,.25)}.btn.success{background:linear-gradient(135deg,#39caa9,#26a989)}.btn.danger{background:rgba(255,99,120,.12);color:#ff9bab;border-color:rgba(255,99,120,.25)}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.photo-card{overflow:hidden;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.025)}
+.photo-head{padding:14px 14px 10px;display:flex;justify-content:space-between;gap:8px}.photo-head b{font-size:14px}.photo-head span{font-size:11px;color:var(--muted)}
+.photo-slot{margin:0 12px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}.photo-box{position:relative;min-height:132px;border-radius:14px;background:#081320;border:1px dashed rgba(255,255,255,.13);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.photo-box img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}.photo-box .ph{position:relative;text-align:center;color:var(--muted);font-size:11px;padding:12px}.camera{position:absolute;right:8px;bottom:8px;z-index:2;padding:7px 9px;border-radius:10px;background:rgba(0,0,0,.6);cursor:pointer}.photo-box input{display:none}
+.tag{padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800;background:rgba(69,211,176,.12);color:#73e4c8}.tag.warn{background:rgba(255,189,92,.12);color:#ffd080}.tag.red{background:rgba(255,99,120,.12);color:#ff9bab}
+.damage-layout{display:grid;grid-template-columns:1fr 1fr;gap:15px}.car-panel{padding:15px}.car-svg{width:100%;max-height:500px}.zone{cursor:pointer}.zone:hover rect,.zone.selected rect{fill:rgba(108,124,255,.32);stroke:#98a3ff}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.legend span{font-size:11px;color:var(--muted);display:flex;gap:5px;align-items:center}.dot{width:9px;height:9px;border-radius:50%;display:inline-block}.dnew{background:var(--danger)}.dold{background:var(--warn)}.dnone{background:#43d8b2}
+.damage-list{display:flex;flex-direction:column;gap:10px}.damage-item{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}.damage-item header{display:flex;justify-content:space-between}.damage-item p{margin:8px 0 0;color:var(--muted);font-size:13px}.wheel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.wheel{padding:14px;border:1px solid var(--line);border-radius:16px;background:#0a1625}.wheel b{display:block;margin-bottom:8px}.wheel .mini{height:85px;border-radius:12px;background:#07111e;border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:11px;overflow:hidden;position:relative}.wheel img{width:100%;height:100%;object-fit:cover}.wheel input{display:none}
+.timeline{display:flex;flex-direction:column;gap:10px}.event{display:grid;grid-template-columns:85px 1fr;gap:12px}.event time{color:var(--muted);font-size:12px;padding-top:4px}.event .eventbox{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}.eventbox b{display:block}.eventbox span{color:var(--muted);font-size:13px}
+.bottom{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);width:min(650px,calc(100% - 20px));z-index:20;padding:7px;border:1px solid var(--line);border-radius:20px;background:rgba(10,19,32,.88);backdrop-filter:blur(20px);box-shadow:0 18px 50px rgba(0,0,0,.4);display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.bottom button{background:none;color:var(--muted);padding:8px 4px;border-radius:14px;cursor:pointer;font-size:11px}.bottom button.active{background:rgba(108,124,255,.16);color:#dce0ff}.bottom i{font-style:normal;display:block;font-size:18px;margin-bottom:3px}
+.toast{position:fixed;top:18px;left:50%;transform:translate(-50%,-130%);transition:.25s;z-index:100;background:#14253a;border:1px solid var(--line);padding:13px 17px;border-radius:14px;box-shadow:var(--shadow)}.toast.show{transform:translate(-50%,0)}
+.overlay{position:fixed;inset:0;background:radial-gradient(700px 400px at 50% 0,rgba(108,124,255,.22),transparent 60%),#07101c;display:grid;place-items:center;z-index:200;padding:20px}.login{width:min(440px,100%);padding:26px}.login .logo{margin-bottom:20px}.login h2{margin:0 0 7px;font-size:28px}.login p{color:var(--muted);line-height:1.5}.login .field{margin-top:13px}.login .btn{width:100%;margin-top:10px}.login .hint{font-size:11px;text-align:center;color:var(--muted);margin-top:15px}
+.empty{padding:32px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:18px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:150;display:none;align-items:end;justify-content:center;padding:12px}.modal.show{display:flex}.sheet{width:min(620px,100%);background:#0e1b2c;border:1px solid var(--line);border-radius:24px 24px 18px 18px;padding:20px;max-height:88vh;overflow:auto}.sheethead{display:flex;justify-content:space-between;align-items:center}.sheet h3{margin:0}.close{background:#17273d;border-radius:11px;width:38px;height:38px;cursor:pointer}
+@media(max-width:850px){.hero{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.photo-grid{grid-template-columns:1fr 1fr}.damage-layout{grid-template-columns:1fr}}
+@media(max-width:560px){.app{padding:12px 12px 100px}.brand small{display:none}.hero h2{font-size:27px}.grid,.photo-grid,.formgrid{grid-template-columns:1fr}.photo-slot{min-height:130px}.bottom{bottom:7px}.tabs{top:0}.stat{min-height:115px}.progress-card{min-height:180px}.wheel-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<div id="loginOverlay" class="overlay">
+  <div class="login card">
+    <div class="logo">✓</div>
+    <h2>AutoCheck</h2>
+    <p>Professionelle Fahrzeug-Übergabe, Rückgabe und Schadendokumentation — direkt auf deinem Smartphone.</p>
+    <div class="field"><label>E-Mail</label><input id="email" type="email" autocomplete="email" placeholder="name@beispiel.de"></div>
+    <div class="field"><label>Passwort</label><input id="password" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+    <button class="btn primary" onclick="login()">Anmelden</button>
+    <button class="btn" onclick="signup()">Konto erstellen</button>
+    <div class="hint">Deine Zugangsdaten werden sicher über Supabase verarbeitet.</div>
+  </div>
+</div>
+
+<div id="app" class="app" style="display:none">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">✓</div>
+      <div><h1>AutoCheck</h1><small>Fahrzeugprüfung & Dokumentation</small></div>
+    </div>
+    <div class="top-actions">
+      <button class="iconbtn" onclick="exportData()" title="Backup">↥</button>
+      <button class="iconbtn" onclick="logout()" title="Abmelden">⇥</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <section class="card hero-main">
+      <div class="kicker">Aktuelle Prüfung</div>
+      <h2 id="heroTitle">Kein Fahrzeug angelegt</h2>
+      <p id="heroSub">Lege zuerst ein Fahrzeug an und starte anschließend die Übergabe.</p>
+      <div class="vehicle-pill">
+        <div><div class="plate" id="heroPlate">—</div><div class="sub" id="heroMeta">Fahrzeugdaten fehlen</div></div>
+        <button class="btn" onclick="showPage('vehicle')">Bearbeiten</button>
+      </div>
+    </section>
+    <section class="card progress-card">
+      <div class="progress-ring" id="ring" style="--p:0%"><b id="progress">0%</b></div>
+      <div class="sub" id="progressText">Noch keine Prüfung gestartet</div>
+    </section>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button class="navbtn active" data-page="home">Übersicht</button>
+    <button class="navbtn" data-page="vehicle">Fahrzeug</button>
+    <button class="navbtn" data-page="handover">Übergabe</button>
+    <button class="navbtn" data-page="return">Rückgabe</button>
+    <button class="navbtn" data-page="damage">Schäden</button>
+    <button class="navbtn" data-page="report">Protokoll</button>
+  </nav>
+
+  <main>
+    <section id="home" class="page active">
+      <div class="grid">
+        <div class="card stat"><div class="emoji">🚗</div><b id="sVehicle">0</b><small>Fahrzeug</small></div>
+        <div class="card stat"><div class="emoji">📸</div><b id="sPhotos">0 / 18</b><small>Vorher / Nachher Fotos</small></div>
+        <div class="card stat"><div class="emoji">⚠️</div><b id="sDamage">0</b><small>Dokumentierte Schäden</small></div>
+      </div>
+      <div class="section-title"><h3>Schnellstart</h3><span>Alles an einem Ort</span></div>
+      <div class="grid">
+        <button class="card stat" onclick="showPage('handover')" style="text-align:left;cursor:pointer"><div class="emoji">📋</div><b>Übergabe</b><small>Fotos und Zustand vor der Fahrt</small></button>
+        <button class="card stat" onclick="showPage('damage')" style="text-align:left;cursor:pointer"><div class="emoji">🔎</div><b>Schäden</b><small>Karosserie und jede Felge einzeln</small></button>
+        <button class="card stat" onclick="showPage('report')" style="text-align:left;cursor:pointer"><div class="emoji">📄</div><b>Protokoll</b><small>Prüfung ansehen und drucken</small></button>
+      </div>
+    </section>
+
+    <section id="vehicle" class="page">
+      <div class="card panel">
+        <h3>Fahrzeugdaten</h3><p>Alle Angaben werden lokal auf diesem Gerät gespeichert und deinem Konto zugeordnet.</p>
+        <div class="formgrid">
+          <div class="field"><label>Marke & Modell</label><input id="vModel" placeholder="z. B. BMW 320d"></div>
+          <div class="field"><label>Kennzeichen</label><input id="vPlate" placeholder="AN-AB 123"></div>
+          <div class="field"><label>Baujahr</label><input id="vYear" placeholder="2024"></div>
+          <div class="field"><label>Farbe</label><input id="vColor" placeholder="Schwarz"></div>
+          <div class="field"><label>Kilometerstand</label><input id="vKm" type="number" placeholder="48210"></div>
+          <div class="field"><label>FIN / VIN</label><input id="vVin" placeholder="WBA..."></div>
+          <div class="field"><label>Fahrer / Kunde</label><input id="vDriver" placeholder="Max Mustermann"></div>
+          <div class="field"><label>Prüfer</label><input id="vInspector" placeholder="Name des Prüfers"></div>
+        </div>
+        <div class="btnrow"><button class="btn primary" onclick="saveVehicle()">Fahrzeug speichern</button><button class="btn danger" onclick="resetVehicle()">Daten zurücksetzen</button></div>
+      </div>
+    </section>
+
+    <section id="handover" class="page">
+      <div class="card panel">
+        <h3>Übergabe</h3><p>Dokumentiere jeden Bereich vor der Fahrt. Jeder Bereich hat sein eigenes Vorher-Foto.</p>
+        <div class="formgrid">
+          <div class="field"><label>Kilometerstand bei Übergabe</label><input id="hKm" type="number"></div>
+          <div class="field"><label>Datum & Uhrzeit</label><input id="hDate" type="datetime-local"></div>
+          <div class="field" style="grid-column:1/-1"><label>Allgemeiner Zustand / Hinweise</label><textarea id="hNote" rows="3" placeholder="z. B. Fahrzeug sauber, Tank 3/4, Schlüssel übergeben ..."></textarea></div>
+        </div>
+      </div>
+      <div class="section-title"><h3>Fotodokumentation</h3><span>9 Bereiche · Vorher</span></div>
+      <div class="photo-grid" id="handoverPhotos"></div>
+    </section>
+
+    <section id="return" class="page">
+      <div class="card panel">
+        <h3>Rückgabe</h3><p>Vergleiche die Rückgabe mit der Übergabe. Neue Schäden werden separat dokumentiert.</p>
+        <div class="formgrid">
+          <div class="field"><label>Kilometerstand bei Rückgabe</label><input id="rKm" type="number"></div>
+          <div class="field"><label>Datum & Uhrzeit</label><input id="rDate" type="datetime-local"></div>
+          <div class="field" style="grid-column:1/-1"><label>Rückgabe / Hinweise</label><textarea id="rNote" rows="3" placeholder="z. B. Kilometer, Tankstand, neue Auffälligkeiten ..."></textarea></div>
+        </div>
+      </div>
+      <div class="section-title"><h3>Fotodokumentation</h3><span>9 Bereiche · Nachher</span></div>
+      <div class="photo-grid" id="returnPhotos"></div>
+    </section>
+
+    <section id="damage" class="page">
+      <div class="damage-layout">
+        <div class="card car-panel">
+          <div class="section-title" style="margin-top:0"><h3>Schadenkarte</h3><span>Bereich antippen</span></div>
+          <svg class="car-svg" viewBox="0 0 800 500" aria-label="Fahrzeugansicht">
+            <defs><linearGradient id="carG" x1="0" x2="1"><stop stop-color="#1c314b"/><stop offset="1" stop-color="#122338"/></linearGradient></defs>
+            <rect x="80" y="65" width="640" height="370" rx="110" fill="url(#carG)" stroke="#40546e" stroke-width="5"/>
+            <rect x="190" y="105" width="420" height="125" rx="50" fill="#0a1625" stroke="#3b506a" stroke-width="4"/>
+            <path d="M250 230h300l70 105H180z" fill="#102239" stroke="#3b506a" stroke-width="4"/>
+            <rect x="80" y="190" width="95" height="110" rx="22" fill="#102239" stroke="#40546e" stroke-width="4"/>
+            <rect x="625" y="190" width="95" height="110" rx="22" fill="#102239" stroke="#40546e" stroke-width="4"/>
+            <circle cx="145" cy="125" r="38" fill="#060d17" stroke="#61718a" stroke-width="7"/><circle cx="655" cy="125" r="38" fill="#060d17" stroke="#61718a" stroke-width="7"/>
+            <circle cx="145" cy="375" r="38" fill="#060d17" stroke="#61718a" stroke-width="7"/><circle cx="655" cy="375" r="38" fill="#060d17" stroke="#61718a" stroke-width="7"/>
+            <g id="zones">
+              <g class="zone" onclick="addDamage('Front')" data-zone="Front"><rect x="290" y="55" width="220" height="45" rx="18" fill="rgba(108,124,255,.08)" stroke="#4c6079" stroke-width="2"/><text x="400" y="83" fill="#b9c5d8" text-anchor="middle" font-size="16">FRONT</text></g>
+              <g class="zone" onclick="addDamage('Fahrerseite')" data-zone="Fahrerseite"><rect x="95" y="215" width="105" height="75" rx="15" fill="rgba(108,124,255,.08)" stroke="#4c6079" stroke-width="2"/><text x="147" y="257" fill="#b9c5d8" text-anchor="middle" font-size="13">LINKS</text></g>
+              <g class="zone" onclick="addDamage('Beifahrerseite')" data-zone="Beifahrerseite"><rect x="600" y="215" width="105" height="75" rx="15" fill="rgba(108,124,255,.08)" stroke="#4c6079" stroke-width="2"/><text x="652" y="257" fill="#b9c5d8" text-anchor="middle" font-size="13">RECHTS</text></g>
+              <g class="zone" onclick="addDamage('Heck')" data-zone="Heck"><rect x="290" y="400" width="220" height="45" rx="18" fill="rgba(108,124,255,.08)" stroke="#4c6079" stroke-width="2"/><text x="400" y="428" fill="#b9c5d8" text-anchor="middle" font-size="16">HECK</text></g>
+              <g class="zone" onclick="addDamage('Motorhaube')" data-zone="Motorhaube"><rect x="270" y="115" width="260" height="75" rx="22" fill="rgba(69,211,176,.05)" stroke="#4c6079" stroke-width="2"/><text x="400" y="157" fill="#b9c5d8" text-anchor="middle" font-size="13">MOTORHAUBE</text></g>
+              <g class="zone" onclick="addDamage('Kofferraum')" data-zone="Kofferraum"><rect x="270" y="320" width="260" height="65" rx="22" fill="rgba(69,211,176,.05)" stroke="#4c6079" stroke-width="2"/><text x="400" y="358" fill="#b9c5d8" text-anchor="middle" font-size="13">KOFFERRAUM</text></g>
+            </g>
+          </svg>
+          <div class="legend"><span><i class="dot dnew"></i> Neuer Schaden</span><span><i class="dot dold"></i> Bereits vorhanden</span><span><i class="dot dnone"></i> Ohne Auffälligkeit</span></div>
+        </div>
+        <div>
+          <div class="card panel">
+            <h3>Schäden & Auffälligkeiten</h3><p>Tippe auf einen Bereich der Fahrzeugkarte oder lege einen Eintrag manuell an.</p>
+            <div class="btnrow"><button class="btn primary" onclick="addDamage()">+ Schaden hinzufügen</button><button class="btn" onclick="clearDamages()">Liste leeren</button></div>
+            <div class="damage-list" id="damageList" style="margin-top:14px"></div>
+          </div>
+          <div class="section-title"><h3>Felgen einzeln</h3><span>4 Räder · eigene Fotos</span></div>
+          <div class="wheel-grid" id="wheelGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="report" class="page">
+      <div class="card panel">
+        <div class="section-title" style="margin-top:0"><h3>Prüfprotokoll</h3><button class="btn primary" onclick="window.print()">PDF / Drucken</button></div>
+        <div id="reportContent"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="bottom" id="bottomNav">
+  <button data-page="home" class="active"><i>⌂</i>Übersicht</button>
+  <button data-page="handover"><i>📷</i>Übergabe</button>
+  <button data-page="return"><i>↩</i>Rückgabe</button>
+  <button data-page="damage"><i>⚠</i>Schäden</button>
+  <button data-page="report"><i>▤</i>Protokoll</button>
+</nav>
+
+<div id="damageModal" class="modal">
+  <div class="sheet">
+    <div class="sheethead"><h3>Schaden dokumentieren</h3><button class="close" onclick="closeModal()">×</button></div>
+    <div class="formgrid" style="margin-top:15px">
+      <div class="field"><label>Bereich</label><input id="dArea" placeholder="z. B. Fahrertür"></div>
+      <div class="field"><label>Status</label><select id="dStatus"><option>Neuer Schaden</option><option>Bereits vorhanden</option><option>Ohne Auffälligkeit</option></select></div>
+      <div class="field"><label>Art</label><select id="dType"><option>Kratzer</option><option>Delle</option><option>Lackschaden</option><option>Steinschlag</option><option>Felge</option><option>Sonstiges</option></select></div>
+      <div class="field"><label>Schweregrad</label><select id="dSeverity"><option>Leicht</option><option>Mittel</option><option>Stark</option></select></div>
+      <div class="field" style="grid-column:1/-1"><label>Beschreibung</label><textarea id="dDesc" rows="3" placeholder="Beschreibung des Schadens ..."></textarea></div>
+    </div>
+    <div class="btnrow"><button class="btn primary" onclick="saveDamage()">Schaden speichern</button><button class="btn" onclick="closeModal()">Abbrechen</button></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://nskguwvyysavbyjwkmez.supabase.co';
+const SUPABASE_KEY='sb_publishable_o_LiCB2j8r1KWCunkBiggQ_7Co6LBr9';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let user=null;
+const areas=['Front','Front links','Front rechts','Seite links','Seite rechts','Heck','Heck links','Heck rechts','Innenraum'];
+const wheels=['Vorne links','Vorne rechts','Hinten links','Hinten rechts'];
+let state={vehicle:{},handover:{},return:{},photos:{},damages:[],wheels:{}};
+
+function key(){return 'autocheck_pro_'+(user?.id||'guest')}
+function load(){try{state=Object.assign(state,JSON.parse(localStorage.getItem(key())||'{}'));}catch(e){}}
+function persist(){localStorage.setItem(key(),JSON.stringify(state)); renderAll()}
+function toast(t){const x=document.getElementById('toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2200)}
+function nowLocal(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+async function login(){
+ const e=email.value.trim(),p=password.value;
+ if(!e||!p)return toast('E-Mail und Passwort eingeben');
+ const {error}=await sb.auth.signInWithPassword({email:e,password:p});
+ if(error)return toast(error.message);
+}
+async function signup(){
+ const e=email.value.trim(),p=password.value;
+ if(!e||!p)return toast('E-Mail und Passwort eingeben');
+ if(p.length<6)return toast('Passwort muss mindestens 6 Zeichen haben');
+ const {error}=await sb.auth.signUp({email:e,password:p});
+ if(error)return toast(error.message);
+ toast('Konto erstellt. Du kannst dich jetzt anmelden.');
+}
+async function logout(){await sb.auth.signOut()}
+sb.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;document.getElementById('loginOverlay').style.display=user?'none':'grid';document.getElementById('app').style.display=user?'block':'none';if(user){load();init();}})
+
+function init(){
+ if(!state.handover.date)state.handover.date=nowLocal();
+ if(!state.return.date)state.return.date=nowLocal();
+ fillVehicle();fillForms();renderAll();
+}
+function fillVehicle(){for(const [id,k] of [['vModel','model'],['vPlate','plate'],['vYear','year'],['vColor','color'],['vKm','km'],['vVin','vin'],['vDriver','driver'],['vInspector','inspector']])document.getElementById(id).value=state.vehicle[k]||''}
+function fillForms(){hKm.value=state.handover.km||state.vehicle.km||'';hDate.value=state.handover.date||nowLocal();hNote.value=state.handover.note||'';rKm.value=state.return.km||'';rDate.value=state.return.date||nowLocal();rNote.value=state.return.note||''}
+function saveVehicle(){
+ state.vehicle={model:vModel.value,plate:vPlate.value,year:vYear.value,color:vColor.value,km:vKm.value,vin:vVin.value,driver:vDriver.value,inspector:vInspector.value};persist();toast('Fahrzeug gespeichert');showPage('home')
+}
+function resetVehicle(){if(confirm('Alle AutoCheck-Daten dieses Kontos auf diesem Gerät löschen?')){localStorage.removeItem(key());location.reload()}}
+function saveSection(which){
+ if(which==='handover')state.handover={km:hKm.value,date:hDate.value,note:hNote.value};
+ else state.return={km:rKm.value,date:rDate.value,note:rNote.value};
+ persist();toast(which==='handover'?'Übergabe gespeichert':'Rückgabe gespeichert')
+}
+
+function photoCard(area,type){
+ const id=type+'_'+area.replace(/[^a-z0-9]+/gi,'_');const val=state.photos[id];
+ return `<div class="photo-card"><div class="photo-head"><b>${area}</b><span>${type==='before'?'Übergabe':'Rückgabe'}</span></div>
+ <div class="photo-slot"><div class="photo-box">${val?`<img src="${val}">`:'<div class="ph">Noch kein Foto<br>aufgenommen</div>'}<label class="camera">📷<input type="file" accept="image/*" capture="environment" onchange="savePhoto('${id}',this)"></label></div></div></div>`
+}
+function renderPhotos(){
+ handoverPhotos.innerHTML=areas.map(a=>photoCard(a,'before')).join('');
+ returnPhotos.innerHTML=areas.map(a=>photoCard(a,'after')).join('');
+}
+function savePhoto(id,input){
+ const file=input.files?.[0];if(!file)return;
+ const reader=new FileReader();reader.onload=()=>{state.photos[id]=reader.result;persist();toast('Foto gespeichert')};reader.readAsDataURL(file)
+}
+
+function addDamage(area){
+ document.getElementById('damageModal').classList.add('show');dArea.value=area||'';dDesc.value='';dStatus.value='Neuer Schaden';dType.value='Kratzer';dSeverity.value='Leicht'
+}
+function closeModal(){document.getElementById('damageModal').classList.remove('show')}
+function saveDamage(){
+ state.damages.push({id:Date.now(),area:dArea.value||'Nicht angegeben',status:dStatus.value,type:dType.value,severity:dSeverity.value,desc:dDesc.value,date:new Date().toLocaleString('de-DE')});
+ persist();closeModal();toast('Schaden dokumentiert')
+}
+function clearDamages(){if(confirm('Alle Schadeneinträge löschen?')){state.damages=[];persist();toast('Schäden gelöscht')}}
+function renderDamages(){
+ damageList.innerHTML=state.damages.length?state.damages.map(d=>`<div class="damage-item"><header><b>${esc(d.area)}</b><span class="tag ${d.status==='Neuer Schaden'?'red':d.status==='Bereits vorhanden'?'warn':''}">${esc(d.status)}</span></header><p><strong>${esc(d.type)}</strong> · ${esc(d.severity)}<br>${esc(d.desc)||'Keine Beschreibung'}<br><small>${esc(d.date)}</small></p></div>`).join(''):'<div class="empty">Noch keine Schäden dokumentiert.<br>Tippe auf einen Bereich der Fahrzeugkarte.</div>';
+ document.querySelectorAll('.zone').forEach(z=>{const n=z.dataset.zone;z.classList.toggle('selected',state.damages.some(d=>d.area===n))})
+}
+function renderWheels(){
+ wheelGrid.innerHTML=wheels.map((w,i)=>{const id='wheel_'+i,val=state.wheels[id];return `<div class="wheel"><b>⚙️ ${w}</b><div class="mini">${val?`<img src="${val}">`:'Eigenes Felgenfoto'}<label class="camera">📷<input type="file" accept="image/*" capture="environment" onchange="saveWheel('${id}',this)"></label></div></div>`}).join('')
+}
+function saveWheel(id,input){const f=input.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{state.wheels[id]=r.result;state.damages.push({id:Date.now(),area:id.replace('wheel_','Felge '),status:'Dokumentiert',type:'Felgenfoto',severity:'—',desc:'Eigenständige Felgen-Dokumentation',date:new Date().toLocaleString('de-DE')});persist();toast('Felgenfoto gespeichert')};r.readAsDataURL(f)}
+
+function renderReport(){
+ const v=state.vehicle||{},before=Object.keys(state.photos).filter(k=>k.startsWith('before_')).length,after=Object.keys(state.photos).filter(k=>k.startsWith('after_')).length;
+ reportContent.innerHTML=`<div class="grid">
+ <div class="card stat"><small>Fahrzeug</small><b style="font-size:19px">${esc(v.model)||'—'}</b><small>${esc(v.plate)||'—'} · ${esc(v.color)||'—'}</small></div>
+ <div class="card stat"><small>Übergabe</small><b style="font-size:19px">${esc(state.handover.km)||'—'} km</b><small>${esc(state.handover.date)||'—'}</small></div>
+ <div class="card stat"><small>Rückgabe</small><b style="font-size:19px">${esc(state.return.km)||'—'} km</b><small>${esc(state.return.date)||'—'}</small></div></div>
+ <div class="section-title"><h3>Dokumentationsstatus</h3><span>${state.damages.length} Einträge</span></div>
+ <div class="timeline">
+ <div class="event"><time>FAHRZEUG</time><div class="eventbox"><b>${esc(v.model)||'Nicht angelegt'}</b><span>${esc(v.vin)||'Keine FIN'} · ${esc(v.driver)||'Kein Fahrer'}</span></div></div>
+ <div class="event"><time>ÜBERGABE</time><div class="eventbox"><b>${before} / 9 Fotos</b><span>${esc(state.handover.note)||'Keine zusätzlichen Hinweise'}</span></div></div>
+ <div class="event"><time>RÜCKGABE</time><div class="eventbox"><b>${after} / 9 Fotos</b><span>${esc(state.return.note)||'Keine zusätzlichen Hinweise'}</span></div></div>
+ <div class="event"><time>SCHÄDEN</time><div class="eventbox"><b>${state.damages.length} dokumentierte Einträge</b><span>Karosserie und separate Felgen-Dokumentation</span></div></div></div>`
+}
+function renderAll(){
+ fillVehicle();fillForms();renderPhotos();renderDamages();renderWheels();renderReport();
+ const v=state.vehicle||{}, before=Object.keys(state.photos).filter(k=>k.startsWith('before_')).length, after=Object.keys(state.photos).filter(k=>k.startsWith('after_')).length;
+ const photos=before+after, damage=state.damages.length, checks=(v.model?1:0)+Math.min(before,9)/9+Math.min(after,9)/9+(damage>=0?0:0);
+ const pct=Math.round(Math.min(1,(checks/3))*100);
+ heroTitle.textContent=v.model||'Kein Fahrzeug angelegt';heroPlate.textContent=v.plate||'—';heroMeta.textContent=[v.year,v.color,v.km?v.km+' km':null].filter(Boolean).join(' · ')||'Fahrzeugdaten fehlen';
+ progress.textContent=pct+'%';ring.style.setProperty('--p',pct+'%');progressText.textContent=pct?'Prüfung in Bearbeitung':'Noch keine Prüfung gestartet';
+ sVehicle.textContent=v.model?'1':'0';sPhotos.textContent=photos+' / 18';sDamage.textContent=damage;
+}
+function showPage(id){
+ document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));
+ document.querySelectorAll('.navbtn,.bottom button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+ if(id==='handover')saveSection('handover'); if(id==='return')saveSection('return');
+ window.scrollTo({top:0,behavior:'smooth'})
+}
+document.querySelectorAll('.navbtn,.bottom button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+[hKm,hDate,hNote].forEach(x=>x.addEventListener('change',()=>saveSection('handover')));
+[rKm,rDate,rNote].forEach(x=>x.addEventListener('change',()=>saveSection('return')));
+
+function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='autocheck-backup.json';a.click();URL.revokeObjectURL(a.href);toast('Backup exportiert')}
+</script>
+
+<style>
+@media print{
+ body{background:white;color:#111}.app{max-width:none;padding:0}.topbar,.tabs,.bottom,.hero,.btn,.iconbtn{display:none!important}.page{display:none!important}.page#report{display:block!important}.card,.panel,.stat,.eventbox{background:white!important;color:#111;box-shadow:none;border:1px solid #ddd}.sub,.eventbox span,.section-title span{color:#555!important}
+}
+</style>
+</body>
+</html>
