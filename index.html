@@ -85,6 +85,25 @@ button{border:0;color:inherit}
 html[dir="rtl"] .topbar,html[dir="rtl"] .section-title,html[dir="rtl"] .vehicle-pill{direction:rtl}
 html[dir="rtl"] .top-actions{flex-direction:row-reverse}
 @media(max-width:560px){.langselect{max-width:108px;font-size:11px}.top-actions{gap:5px}}
+
+/* Premium layer */
+body{background:radial-gradient(1000px 600px at 100% -15%,rgba(102,118,255,.28),transparent 58%),radial-gradient(800px 500px at -10% 30%,rgba(45,211,174,.13),transparent 55%),linear-gradient(180deg,#050b14,#081321 48%,#07111d)}
+.card{background:linear-gradient(145deg,rgba(20,34,55,.94),rgba(10,20,34,.94));border-color:rgba(255,255,255,.075);box-shadow:0 20px 65px rgba(0,0,0,.27)}
+.hero-main{padding:30px;background:radial-gradient(500px 260px at 100% 0,rgba(108,124,255,.18),transparent 65%),linear-gradient(145deg,rgba(24,39,64,.96),rgba(10,20,34,.96))}
+.hero h2{letter-spacing:-.04em}.logo{background:linear-gradient(135deg,#8290ff,#5f70f4 48%,#42d3b0);box-shadow:0 15px 40px rgba(92,108,244,.35)}
+.stat{transition:transform .18s,box-shadow .18s}.stat:hover{transform:translateY(-2px);box-shadow:0 22px 50px rgba(0,0,0,.3)}
+.photo-card{background:linear-gradient(160deg,rgba(21,36,57,.95),rgba(10,20,33,.95));transition:.2s}.photo-card:hover{transform:translateY(-2px);border-color:rgba(116,130,255,.3)}
+.photo-box{min-height:145px;background:linear-gradient(145deg,#07111e,#0c1a2b)}
+.photo-actions{position:absolute;right:7px;bottom:7px;z-index:5;display:flex;gap:5px}.photo-actions .camera,.photo-actions .gallery{position:static;width:35px;height:35px;padding:0;display:grid;place-items:center;border-radius:10px;cursor:pointer}.photo-actions .camera{background:linear-gradient(135deg,#6474f7,#4354d7);box-shadow:0 8px 20px rgba(67,84,215,.35)}.photo-actions .gallery{background:rgba(14,27,43,.94);border:1px solid rgba(255,255,255,.1)}.photo-actions input{display:none}
+.savebar{background:linear-gradient(90deg,rgba(18,31,50,.96),rgba(13,25,41,.96));box-shadow:0 15px 40px rgba(0,0,0,.22)}
+.damage-item,.wheel{background:linear-gradient(145deg,rgba(22,37,57,.88),rgba(11,21,34,.88));transition:.18s}.damage-item:hover,.wheel:hover{transform:translateY(-2px);border-color:rgba(108,124,255,.25)}
+.language-trigger{height:44px;min-width:82px;padding:0 11px;border-radius:14px;background:rgba(18,31,49,.9);border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;gap:7px;color:#f5f8fc;font-weight:800;cursor:pointer}
+.language-trigger .chev{color:#8f9db1}.language-menu{position:fixed;top:72px;right:18px;width:min(360px,calc(100vw - 28px));max-height:min(650px,calc(100vh - 90px));overflow:hidden;z-index:80;display:none;background:rgba(10,20,34,.98);border:1px solid rgba(255,255,255,.1);border-radius:22px;box-shadow:0 30px 90px rgba(0,0,0,.55);backdrop-filter:blur(25px)}.language-menu.show{display:block;animation:menuIn .18s ease}@keyframes menuIn{from{opacity:0;transform:translateY(-7px) scale(.98)}to{opacity:1;transform:none}}
+.language-menu-head{display:flex;justify-content:space-between;align-items:center;padding:17px 18px 12px}.language-menu-head b{display:block}.language-menu-head span{font-size:11px;color:var(--muted)}.language-menu-head button{width:34px;height:34px;border-radius:10px;background:#16273c;color:#fff;cursor:pointer;font-size:20px}
+.language-search{margin:0 14px 10px;height:43px;border-radius:13px;background:#081522;border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;padding:0 12px;gap:8px}.language-search span{font-size:20px;color:#8190a5}.language-search input{flex:1;border:0;outline:0;background:none;color:#fff;font-size:14px}.language-options{padding:4px 10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:460px;overflow:auto}.language-option{display:flex;align-items:center;gap:9px;padding:11px;border-radius:13px;background:transparent;border:1px solid transparent;color:#eaf0f8;text-align:left;cursor:pointer}.language-option:hover{background:rgba(255,255,255,.05)}.language-option.selected{background:rgba(108,124,255,.13);border-color:rgba(108,124,255,.28)}.language-option .flag{font-size:20px}.language-option small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.compare-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.compare-row b{display:block;font-size:12px}.compare-row span{display:block;color:var(--muted);font-size:10px;margin:2px 0 7px}.compare-row img,.compare-row em{display:block;width:100%;height:130px;border-radius:13px;object-fit:cover;background:#07111e;border:1px solid var(--line)}.compare-row em{display:grid;place-items:center;color:var(--muted);font-style:normal;font-size:11px}
+@media(max-width:560px){.language-menu{right:10px;top:64px}.language-options{grid-template-columns:1fr 1fr}.language-trigger{min-width:68px}.language-trigger span:nth-child(2){display:none}.compare-row{gap:7px}.compare-row img,.compare-row em{height:105px}}
+
 </style>
 </head>
 <body>
@@ -110,29 +129,12 @@ html[dir="rtl"] .top-actions{flex-direction:row-reverse}
       <div><h1 data-i18n="brand">AutoCheck</h1><small data-i18n="brandSub">Fahrzeugprüfung & Dokumentation</small></div>
     </div>
     <div class="top-actions">
-      <select id="langSelect" class="langselect" onchange="setLanguage(this.value)" aria-label="Sprache">
-        <option value="de">🇩🇪 Deutsch</option>
-        <option value="en">🇬🇧 English</option>
-        <option value="fr">🇫🇷 Français</option>
-        <option value="es">🇪🇸 Español</option>
-        <option value="it">🇮🇹 Italiano</option>
-        <option value="nl">🇳🇱 Nederlands</option>
-        <option value="pl">🇵🇱 Polski</option>
-        <option value="pt">🇵🇹 Português</option>
-        <option value="tr">🇹🇷 Türkçe</option>
-        <option value="ar">🇸🇦 العربية</option>
-        <option value="ru">🇷🇺 Русский</option>
-        <option value="uk">🇺🇦 Українська</option>
-        <option value="ro">🇷🇴 Română</option>
-        <option value="cs">🇨🇿 Čeština</option>
-        <option value="sk">🇸🇰 Slovenčina</option>
-        <option value="hu">🇭🇺 Magyar</option>
-        <option value="el">🇬🇷 Ελληνικά</option>
-        <option value="sv">🇸🇪 Svenska</option>
-        <option value="da">🇩🇰 Dansk</option>
-        <option value="no">🇳🇴 Norsk</option>
-        <option value="fi">🇫🇮 Suomi</option>
-      </select>
+      <button class="language-trigger" onclick="toggleLanguageMenu()" aria-label="Sprache auswählen"><span id="langFlag">🇩🇪</span><span id="langShort">DE</span><span class="chev">⌄</span></button>
+      <div id="languageMenu" class="language-menu">
+        <div class="language-menu-head"><div><b>Sprache</b><span>App language</span></div><button onclick="toggleLanguageMenu()">×</button></div>
+        <div class="language-search"><span>⌕</span><input id="languageSearch" placeholder="Sprache suchen…" oninput="filterLanguages(this.value)"></div>
+        <div id="languageOptions" class="language-options"></div>
+      </div>
       <button class="iconbtn" onclick="exportData()" title="Backup">↥</button>
       <button class="iconbtn" onclick="syncNow()" title="Cloud laden">↻</button>
       <button class="iconbtn" onclick="logout()" title="Abmelden">⇥</button>
@@ -223,7 +225,7 @@ html[dir="rtl"] .top-actions{flex-direction:row-reverse}
         </div>
       </div>
       <div class="section-title"><h3>Fotodokumentation</h3><span>9 Bereiche · bis zu 4 Fotos je Bereich</span></div>
-      <div class="photo-grid" id="returnPhotos"></div>
+      <div class="photo-grid" id="returnPhotos"></div><div class="section-title"><h3>Vorher / Nachher</h3><span>Direkter Vergleich</span></div><div class="card panel" id="comparePanel"></div>
     </section>
 
     <section id="damage" class="page">
@@ -368,28 +370,25 @@ da:{brand:'AutoCheck',brandSub:'Køretøjskontrol og dokumentation',currentCheck
 no:{brand:'AutoCheck',brandSub:'Kjøretøykontroll og dokumentasjon',currentCheck:'Gjeldende kontroll',heroEmpty:'Legg til et kjøretøy først og start deretter overleveringen.',edit:'Rediger',overview:'Oversikt',vehicle:'Kjøretøy',handover:'Overlevering',return:'Retur',damage:'Skader',report:'Rapport',quickStart:'Hurtigstart',handoverDesc:'Bilder og tilstand før kjøring',damageDesc:'Karosseri og hvert hjul separat',reportDesc:'Vis og skriv ut kontroll',vehicleData:'Kjøretøydata',damageTitle:'Skader og funn',wheelsTitle:'Hjul separat',inspectionReport:'Kontrollrapport'},
 fi:{brand:'AutoCheck',brandSub:'Ajoneuvon tarkastus ja dokumentointi',currentCheck:'Nykyinen tarkastus',heroEmpty:'Lisää ensin ajoneuvo ja aloita sitten luovutus.',edit:'Muokkaa',overview:'Yleiskatsaus',vehicle:'Ajoneuvo',handover:'Luovutus',return:'Palautus',damage:'Vauriot',report:'Raportti',quickStart:'Pikakäynnistys',handoverDesc:'Kuvat ja kunto ennen ajoa',damageDesc:'Kori ja jokainen pyörä erikseen',reportDesc:'Näytä ja tulosta tarkastus',vehicleData:'Ajoneuvon tiedot',damageTitle:'Vauriot ja havainnot',wheelsTitle:'Pyörät erikseen',inspectionReport:'Tarkastusraportti'}
 };
+const LANG_META={de:['🇩🇪','Deutsch'],en:['🇬🇧','English'],fr:['🇫🇷','Français'],es:['🇪🇸','Español'],it:['🇮🇹','Italiano'],nl:['🇳🇱','Nederlands'],pl:['🇵🇱','Polski'],pt:['🇵🇹','Português'],tr:['🇹🇷','Türkçe'],ar:['🇸🇦','العربية'],ru:['🇷🇺','Русский'],uk:['🇺🇦','Українська'],ro:['🇷🇴','Română'],cs:['🇨🇿','Čeština'],sk:['🇸🇰','Slovenčina'],hu:['🇭🇺','Magyar'],el:['🇬🇷','Ελληνικά'],sv:['🇸🇪','Svenska'],da:['🇩🇰','Dansk'],no:['🇳🇴','Norsk'],fi:['🇫🇮','Suomi']};
 const RTL_LANGS=new Set(['ar']);
+function renderLanguageOptions(filter=''){
+ const box=document.getElementById('languageOptions');if(!box)return;const q=filter.toLowerCase().trim();
+ box.innerHTML=Object.entries(LANG_META).filter(([c,m])=>!q||c.includes(q)||m[1].toLowerCase().includes(q)).map(([c,m])=>`<button class="language-option ${localStorage.getItem('autocheck_lang')===c?'selected':''}" onclick="setLanguage('${c}')"><span class="flag">${m[0]}</span><span><b>${m[1]}</b><small>${c.toUpperCase()}</small></span></button>`).join('');
+}
+function toggleLanguageMenu(){const m=document.getElementById('languageMenu');if(!m)return;m.classList.toggle('show');if(m.classList.contains('show')){renderLanguageOptions();setTimeout(()=>document.getElementById('languageSearch')?.focus(),50)}}
+function filterLanguages(v){renderLanguageOptions(v)}
 function setLanguage(lang){
-  const dict=I18N[lang]||I18N.de;
-  localStorage.setItem('autocheck_lang',lang);
-  document.documentElement.lang=lang;
-  document.documentElement.dir=RTL_LANGS.has(lang)?'rtl':'ltr';
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    const k=el.dataset.i18n;if(dict[k])el.textContent=dict[k];
-  });
-  const sel=document.getElementById('langSelect');if(sel)sel.value=lang;
-  updateDynamicLanguage(lang);
+ const dict=I18N[lang]||I18N.de;localStorage.setItem('autocheck_lang',lang);
+ document.documentElement.lang=lang;document.documentElement.dir=RTL_LANGS.has(lang)?'rtl':'ltr';
+ document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(dict[k])el.textContent=dict[k]});
+ const meta=LANG_META[lang]||LANG_META.de;document.getElementById('langFlag').textContent=meta[0];document.getElementById('langShort').textContent=lang.toUpperCase();
+ renderLanguageOptions(document.getElementById('languageSearch')?.value||'');document.getElementById('languageMenu')?.classList.remove('show');
+ updateDynamicLanguage(lang);
 }
-function updateDynamicLanguage(lang){
-  const d=I18N[lang]||I18N.de;
-  const v=state?.vehicle||{};
-  if(typeof heroSub!=='undefined'&&heroSub)heroSub.textContent=v.model?d.currentCheck:d.heroEmpty;
-  document.title='AutoCheck — '+d.brandSub;
-}
-function initLanguage(){
-  const saved=localStorage.getItem('autocheck_lang')||((navigator.language||'de').slice(0,2));
-  setLanguage(I18N[saved]?saved:'de');
-}
+function updateDynamicLanguage(lang){const d=I18N[lang]||I18N.de;const v=state?.vehicle||{};const hs=document.getElementById('heroSub');if(hs)hs.textContent=v.model?d.currentCheck:d.heroEmpty;document.title='AutoCheck — '+d.brandSub}
+function initLanguage(){const saved=localStorage.getItem('autocheck_lang')||((navigator.language||'de').slice(0,2));setLanguage(I18N[saved]?saved:'de')}
+document.addEventListener('click',e=>{const m=document.getElementById('languageMenu'),t=document.querySelector('.language-trigger');if(m?.classList.contains('show')&&!m.contains(e.target)&&!t?.contains(e.target))m.classList.remove('show')});
 
 async function login(){
  const e=email.value.trim(),p=password.value;
@@ -428,14 +427,14 @@ function saveSection(which){
 
 function photoCard(area,type){
  const base=type+'_'+area.replace(/[^a-z0-9]+/gi,'_');
- const arr=Array.isArray(state.photos[base])?state.photos[base]:[];
+ const raw=state.photos[base];const arr=Array.isArray(raw)?raw:(raw?[raw]:[]);
  const slots=[0,1,2,3];
  return `<div class="photo-card">
    <div class="photo-head"><b>${area}</b><span>${type==='before'?'Übergabe · Vorher':'Rückgabe · Nachher'}</span></div>
    <div class="multi-photos">
    ${slots.map(i=>`<div class="photo-box ${arr[i]?'filled':''}">
       ${arr[i]?`<img src="${arr[i]}"><button class="photo-delete" onclick="deletePhoto('${base}',${i})">×</button>`:'<div class="ph">Foto ${i+1}<br>noch leer</div>'}
-      <label class="camera">📷<input type="file" accept="image/*" capture="environment" onchange="savePhoto('${base}',${i},this)"></label>
+      <div class="photo-actions"><label class="camera">📷<input type="file" accept="image/*" capture="environment" onchange="savePhoto('${base}',${i},this)"></label><label class="gallery">▣<input type="file" accept="image/*" onchange="savePhoto('${base}',${i},this)"></label></div>
    </div>`).join('')}
    </div>
    <div class="photo-footer">${arr.length||0} / 4 Fotos · mehrere Fotos pro Bereich möglich</div>
@@ -446,8 +445,8 @@ function savePhoto(id,index,input){
  const reader=new FileReader();
  reader.onload=()=>{
    if(!Array.isArray(state.photos[id])) state.photos[id]=[];
+   while(state.photos[id].length<=index)state.photos[id].push(null);
    state.photos[id][index]=reader.result;
-   state.photos[id]=state.photos[id].filter(Boolean);
    persistLocal(); toast('Foto hinzugefügt · jetzt speichern');
  };
  reader.readAsDataURL(file)
@@ -478,9 +477,14 @@ function renderDamages(){
  document.querySelectorAll('.zone').forEach(z=>{const n=z.dataset.zone;z.classList.toggle('selected',state.damages.some(d=>d.area===n))})
 }
 function renderWheels(){
- wheelGrid.innerHTML=wheels.map((w,i)=>{const id='wheel_'+i,val=state.wheels[id];return `<div class="wheel"><b>⚙️ ${w}</b><div class="mini">${val?`<img src="${val}">`:'Eigenes Felgenfoto'}<label class="camera">📷<input type="file" accept="image/*" capture="environment" onchange="saveWheel('${id}',this)"></label></div></div>`}).join('')
+ wheelGrid.innerHTML=wheels.map((w,i)=>{const id='wheel_'+i,val=state.wheels[id];return `<div class="wheel"><b>⚙️ ${w}</b><div class="mini">${val?`<img src="${val}">`:'Eigenes Felgenfoto'}<div class="photo-actions"><label class="camera">📷<input type="file" accept="image/*" capture="environment" onchange="saveWheel('${id}',this)"></label><label class="gallery">▣<input type="file" accept="image/*" onchange="saveWheel('${id}',this)"></label></div></div></div>`}).join('')
 }
 function saveWheel(id,input){const f=input.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{state.wheels[id]=r.result;state.damages.push({id:Date.now(),area:id.replace('wheel_','Felge '),status:'Dokumentiert',type:'Felgenfoto',severity:'—',desc:'Eigenständige Felgen-Dokumentation',date:new Date().toLocaleString('de-DE')});persist();toast('Felgenfoto gespeichert')};r.readAsDataURL(f)}
+
+function renderCompare(){
+ const el=document.getElementById('comparePanel');if(!el)return;
+ el.innerHTML=areas.map(area=>{const b=state.photos['before_'+area.replace(/[^a-z0-9]+/gi,'_')],a=state.photos['after_'+area.replace(/[^a-z0-9]+/gi,'_')];const bp=Array.isArray(b)?b[0]:b,ap=Array.isArray(a)?a[0]:a;return `<div class="compare-row"><div><b>${area}</b><span>Übergabe</span>${bp?`<img src="${bp}">`:'<em>Kein Foto</em>'}</div><div><b>${area}</b><span>Rückgabe</span>${ap?`<img src="${ap}">`:'<em>Kein Foto</em>'}</div></div>`}).join('');
+}
 
 function renderReport(){
  const v=state.vehicle||{},before=Object.entries(state.photos).filter(([k])=>k.startsWith('before_')).reduce((n,[,a])=>n+(Array.isArray(a)?a.length:0),0),after=Object.entries(state.photos).filter(([k])=>k.startsWith('after_')).reduce((n,[k,a])=>n+(Array.isArray(a)?a.length:0),0);
@@ -496,7 +500,7 @@ function renderReport(){
  <div class="event"><time>SCHÄDEN</time><div class="eventbox"><b>${state.damages.length} dokumentierte Einträge</b><span>Karosserie und separate Felgen-Dokumentation</span></div></div></div>`
 }
 function renderAll(){
- fillVehicle();fillForms();renderPhotos();renderDamages();renderWheels();renderReport();
+ fillVehicle();fillForms();renderPhotos();renderDamages();renderWheels();renderCompare();renderReport();
  const v=state.vehicle||{}, before=Object.keys(state.photos).filter(k=>k.startsWith('before_')).length, after=Object.keys(state.photos).filter(k=>k.startsWith('after_')).length;
  const photos=Object.values(state.photos).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0), damage=state.damages.length, checks=(v.model?1:0)+Math.min(before,9)/9+Math.min(after,9)/9+(damage>=0?0:0);
  const pct=Math.round(Math.min(1,(checks/3))*100);
